@@ -13,6 +13,7 @@ Experiments with [netam](https://github.com/matsengrp/netam)
 * train a mouse model
     * compare models predicting on the replay experiment?
 * should we be optimizing branch length?
+* does the close mutations analysis add anything here?
 * make a nice python interface for people who just want to use the model
 * write an R interface for people who want to use the model
 * set up CI
