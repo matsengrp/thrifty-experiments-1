@@ -10,6 +10,8 @@ Experiments with [netam](https://github.com/matsengrp/netam)
 * think about boundary cases of beginning and end of sequence
     * you know, for BCR sequences, we could probably guess what the beginning and end is
 * rerun everything with 500 long bases
+* read up if others have done the same thing https://www.nature.com/articles/s41467-019-09027-x
+* we need bigger validation sets, and/or to consider the strategy for reporting loss
 * train a mouse model
     * compare models predicting on the replay experiment?
 * should we be optimizing branch length?
