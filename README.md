@@ -10,7 +10,6 @@ Experiments with [netam](https://github.com/matsengrp/netam)
 * think about boundary cases of beginning and end of sequence
     * you know, for BCR sequences, we could probably guess what the beginning and end is
 * rerun everything with 500 long bases
-* rename `CNNPP` model to `CNNPE` model
 * train a mouse model
     * compare models predicting on the replay experiment?
 * make a nice python interface for people who just want to use the model
