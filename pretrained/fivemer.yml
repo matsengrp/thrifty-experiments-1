@@ -1,0 +1,5 @@
+max_length: 500
+model_class: FivemerModel
+model_hyperparameters:
+  kmer_length: 5
+serialization_version: 0
