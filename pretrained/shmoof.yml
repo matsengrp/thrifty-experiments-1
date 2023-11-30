@@ -1,5 +1,6 @@
-model_class: FivemerModel
+model_class: SHMoofModel
 model_hyperparameters:
   kmer_length: 5
+  site_count: 500
 serialization_version: 0
 site_count: 500

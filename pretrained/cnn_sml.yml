@@ -1,0 +1,9 @@
+model_class: CNNModel
+model_hyperparameters:
+  dropout_rate: 0.0
+  embedding_dim: 6
+  filter_count: 14
+  kernel_size: 7
+  kmer_length: 3
+serialization_version: 0
+site_count: 500
