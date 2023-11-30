@@ -7,7 +7,10 @@ Experiments with [netam](https://github.com/matsengrp/netam)
 
 * compare models using the shmple framework
 * make a per-NT model
-* think about boundary cases of beginning and end of sequence
+* Consider the role of branch length. 
+    * It's a normalization applied in training and evaluation. Prediction happens with branch length 1. 
+    * We could have a better fitting model if we allowed branch length to vary.
+* Think about boundary cases of beginning and end of sequence
     * you know, for BCR sequences, we could probably guess what the beginning and end is
 * rerun everything with 500 long bases
 * read up if others have done the same thing https://www.nature.com/articles/s41467-019-09027-x
