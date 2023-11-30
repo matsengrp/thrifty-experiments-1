@@ -1,5 +1,5 @@
-max_length: 500
 model_class: FivemerModel
+site_count: 500
 model_hyperparameters:
   kmer_length: 5
 serialization_version: 0
