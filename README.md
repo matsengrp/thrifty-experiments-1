@@ -12,17 +12,12 @@ Experiments with [netam](https://github.com/matsengrp/netam)
     * We could have a better fitting model if we allowed branch length to vary.
 * Think about boundary cases of beginning and end of sequence
     * you know, for BCR sequences, we could probably guess what the beginning and end is
-* rerun everything with 500 long bases
 * read up if others have done the same thing https://www.nature.com/articles/s41467-019-09027-x
-* we need bigger validation sets, and/or to consider the strategy for reporting loss
 * train a mouse model
     * compare models predicting on the replay experiment?
-* should we be optimizing branch length?
 * does the close mutations analysis add anything here?
-* make a nice python interface for people who just want to use the model
 * write an R interface for people who want to use the model
 * set up CI
-* make model releases
 
 
 ## Goals
