@@ -13,6 +13,7 @@ Experiments with [netam](https://github.com/matsengrp/netam)
 * Think about boundary cases of beginning and end of sequence
     * you know, for BCR sequences, we could probably guess what the beginning and end is
 * read up if others have done the same thing https://www.nature.com/articles/s41467-019-09027-x
+    * DNABERT uses overlapping 3-mers https://doi.org/10.1093/bioinformatics/btab083
 * train a mouse model
     * compare models predicting on the replay experiment?
 * does the close mutations analysis add anything here?
