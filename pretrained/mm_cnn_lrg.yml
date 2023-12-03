@@ -1,0 +1,13 @@
+model_class: CNNModel
+model_hyperparameters:
+  dropout_rate: 0.3
+  embedding_dim: 7
+  filter_count: 19
+  kernel_size: 11
+  kmer_length: 3
+serialization_version: 0
+site_count: 500
+training_hyperparameters:
+  l2_regularization_coeff: 5.0e-07
+  learning_rate: 0.1
+  min_learning_rate: 0.0001
