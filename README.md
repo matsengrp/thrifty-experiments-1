@@ -5,8 +5,10 @@ Experiments with [netam](https://github.com/matsengrp/netam)
 
 ## TODOs
 
+* https://github.com/matsengrp/epam/issues/39
 * compare models using the shmple framework
 * make a per-NT model
+* does performance depend on N padding?
 * Consider the role of branch length. 
     * It's a normalization applied in training and evaluation. Prediction happens with branch length 1. 
     * We could have a better fitting model if we allowed branch length to vary.
