@@ -6,6 +6,7 @@ Experiments with [netam](https://github.com/matsengrp/netam)
 ## TODOs
 
 * https://github.com/matsengrp/epam/issues/39
+* replace "dropout_rate" with "dropout_prob"
 * compare models using the shmple framework
 * make a per-NT model
 * does performance depend on N padding?
