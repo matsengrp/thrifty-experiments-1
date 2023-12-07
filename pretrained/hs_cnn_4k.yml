@@ -1,6 +1,6 @@
 model_class: CNNModel
 model_hyperparameters:
-  dropout_rate: 0.1
+  dropout_prob: 0.1
   embedding_dim: 12
   filter_count: 14
   kernel_size: 17
