@@ -1,6 +1,5 @@
 model_class: FivemerModel
-model_hyperparameters:
-  kmer_length: 5
+model_hyperparameters: {}
 serialization_version: 0
 encoder_class: KmerSequenceEncoder
 encoder_parameters:
