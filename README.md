@@ -5,12 +5,17 @@ Experiments with [netam](https://github.com/matsengrp/netam)
 
 ## TODOs
 
+* move only a batch at a time to GPU
+* we assume that if a sequence is N in the child it is also N in the parent
+
 * compare models using the shmple framework
 * make a per-NT model
 * does performance depend on N padding?
 * Consider the role of branch length. 
     * It's a normalization applied in training and evaluation. Prediction happens with branch length 1. 
     * We could have a better fitting model if we allowed branch length to vary.
+    * I think we need some sort of internal normalization for this to make sense. Otherwise overall mutability will get sucked into branch length.
+    * Perhaps it's fine the way it is. 
     * Would it matter for things like R-precision?
 * Think about boundary cases of beginning and end of sequence
     * you know, for BCR sequences, we could probably guess what the beginning and end is
