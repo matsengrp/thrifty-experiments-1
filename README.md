@@ -11,12 +11,7 @@ Experiments with [netam](https://github.com/matsengrp/netam)
 * compare models using the shmple framework
 * make a per-NT model
 * does performance depend on N padding?
-* Consider the role of branch length. 
-    * It's a normalization applied in training and evaluation. Prediction happens with branch length 1. 
-    * We could have a better fitting model if we allowed branch length to vary.
-    * I think we need some sort of internal normalization for this to make sense. Otherwise overall mutability will get sucked into branch length.
-    * Perhaps it's fine the way it is. 
-    * Would it matter for things like R-precision?
+* For branch length, the best approach is to optimize and normalize a given site of a given sequence to 1
 * Think about boundary cases of beginning and end of sequence
     * you know, for BCR sequences, we could probably guess what the beginning and end is
 * read up if others have done the same thing https://www.nature.com/articles/s41467-019-09027-x
@@ -25,6 +20,9 @@ Experiments with [netam](https://github.com/matsengrp/netam)
 * does the close mutations analysis add anything here?
 * write an R interface for people who want to use the model
 * set up CI
+
+* Future work could use structural information for the dnsm
+    * https://www.mlsb.io/papers_2023/Enhancing_Antibody_Language_Models_with_Structural_Information.pdf
 
 ### DNSM
 
