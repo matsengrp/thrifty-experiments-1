@@ -2,6 +2,8 @@ import os
 
 import pandas as pd
 
+from netam import framework
+
 
 def load_shmoof_dataframes(csv_path, sample_count=None, val_nickname="13"):
     """Load the shmoof dataframes from the csv_path and return train and validation dataframes.
@@ -55,6 +57,18 @@ def load_shmoof_dataframes(csv_path, sample_count=None, val_nickname="13"):
     assert len(val_df) > 0, f"No validation samples found with nickname {val_nickname}"
 
     return train_df, val_df
+
+# TODO delete this, I think
+def dataset_by_kmer_length_of(self, data_df, device):
+    data_dict = {
+        kmer_length: framework.SHMoofDataset(
+            data_df, kmer_length=kmer_length, site_count=self.site_count
+        )
+        for kmer_length in [1, 3, 5]
+    }
+    for data in data_dict.values():
+        data.to(device)
+    return data_dict
 
 
 def pcp_df_of_nickname(dataset_name):

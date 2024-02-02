@@ -5,10 +5,10 @@ Experiments with [netam](https://github.com/matsengrp/netam)
 
 ## TODOs
 
-* move only a batch at a time to GPU
+* look at prob_sums_too_big for a single example
+* we could redefine things to return a selection factor rather than log selection factor
 * we assume that if a sequence is N in the child it is also N in the parent
 
-* compare models using the shmple framework
 * make a per-NT model
 * does performance depend on N padding?
 * For branch length, the best approach is to optimize and normalize a given site of a given sequence to 1
@@ -40,7 +40,7 @@ Experiments with [netam](https://github.com/matsengrp/netam)
 
 * `cnn_1mer.ipynb`: Hyperparameter optimization for CNN1Mer model
 * `cnnmlp.ipynb`: Adding a hidden layer in the final layer is bad
-* `cnnpp.ipynb`: Adding a positional encoding to the CNN
+* `cnnpe.ipynb`: Adding a positional encoding to the CNN
 * `cnnxformer.ipynb`: Adding a transformer to the CNN makes it worse
 * `data-description.ipynb`: Exploration of SHMoof data sets
 * `fivemer.ipynb`: L2 regularizing the 5mer model doesn't help
