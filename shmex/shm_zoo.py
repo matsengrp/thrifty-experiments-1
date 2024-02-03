@@ -10,7 +10,7 @@ from netam.framework import load_crepe, SHMoofDataset, RSSHMBurrito
 from netam import models 
 
 sys.path.append("..")
-from shmex.shm_data import load_shmoof_dataframes, pcp_df_of_nickname, dataset_by_kmer_length_of
+from shmex.shm_data import load_shmoof_dataframes, pcp_df_of_nickname
 
 # Very helpful for debugging!
 # torch.autograd.set_detect_anomaly(True)
