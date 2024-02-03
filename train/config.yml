@@ -1,3 +1,3 @@
-model_names: ["cnn_ind_med"]
+model_names: ["cnn_ind_sml", "cnn_ind_med", "cnn_ind_lrg", "cnn_ind_4k", "cnn_ind_4k_k13", "cnn_ind_8k"]
 train_data_nicknames: ["shmoof_small"]
-test_data_nicknames: ["tangshm"]
+test_data_nicknames: ["shmoof_small", "tangshm"]

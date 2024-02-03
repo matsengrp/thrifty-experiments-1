@@ -137,7 +137,10 @@ def train_model(model_name, dataset_name, resume=True):
 def validation_burrito_of(crepe_prefix, dataset_name):
     crepe = load_crepe(crepe_prefix)
     model = crepe.model
-    if dataset_name == "tangshm1k":
+    if dataset_name.startswith("shmoof_"):
+        _, val_nickname = dataset_name.split("_")
+        _, pcp_df = load_shmoof_dataframes(shmoof_path, val_nickname=val_nickname)
+    elif dataset_name == "tangshm1k":
         pcp_df = pcp_df_of_nickname("tangshm", sample_count=1000)
     else:
         pcp_df = pcp_df_of_nickname(dataset_name)
