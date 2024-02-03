@@ -71,7 +71,7 @@ def dataset_by_kmer_length_of(self, data_df, device):
     return data_dict
 
 
-def pcp_df_of_nickname(dataset_name):
+def pcp_df_of_nickname(dataset_name, sample_count=None):
     dataset_dict = {
         "tangshm": "data/tang-deepshm_size2_edges_22-May-2023.branch_length.csv"
     }
@@ -83,7 +83,10 @@ def pcp_df_of_nickname(dataset_name):
     dataset_dict = {name: localify(path) for name, path in dataset_dict.items()}
     print(f"Loading {dataset_dict[dataset_name]}")
 
-    pcp_df = pd.read_csv(dataset_dict[dataset_name], index_col=0).reset_index(drop=True)
+    pcp_df = pd.read_csv(dataset_dict[dataset_name], index_col=0)
     pcp_df = pcp_df[pcp_df["parent"] != pcp_df["child"]]
+    if sample_count is not None:
+        pcp_df = pcp_df.sample(sample_count)
+    pcp_df = pcp_df.reset_index(drop=True)
 
     return pcp_df

@@ -108,23 +108,26 @@ def trained_model_path(model_name, data_nickname):
 
 
 def train_model(model_name, dataset_name, resume=True):
-    shmoof, val_nickname = dataset_name.split("_")
-    assert shmoof == "shmoof"
-    train_df, val_df = load_shmoof_dataframes(shmoof_path, val_nickname=val_nickname)
+    if dataset_name == "tst":
+        sample_count = 1000
+        val_nickname = "small"
+    else:
+        sample_count = None
+        shmoof, val_nickname = dataset_name.split("_")
+        assert shmoof == "shmoof"
+    train_df, val_df = load_shmoof_dataframes(shmoof_path, sample_count=sample_count, val_nickname=val_nickname)
     out_prefix = trained_model_path(model_name, dataset_name)
-    burrito_name = trained_model_str(model_name, dataset_name)
+    # burrito_name = trained_model_str(model_name, dataset_name)
     model = create_model(model_name)
     burrito = RSSHMBurrito(
         SHMoofDataset(train_df, kmer_length=model.kmer_length, site_count=site_count),
         SHMoofDataset(val_df, kmer_length=model.kmer_length, site_count=site_count),
         model,
         **burrito_params,
-        device=device,
-        name=burrito_name,
     )
 
     if dataset_name == "tst":
-        epochs = 2
+        burrito.train(epochs=2)
     else:
         burrito.train(epochs=epochs)
 
@@ -136,13 +139,15 @@ def train_model(model_name, dataset_name, resume=True):
 def validation_burrito_of(crepe_prefix, dataset_name):
     crepe = load_crepe(crepe_prefix)
     model = crepe.model
-    pcp_df = pcp_df_of_nickname(dataset_name)
+    if dataset_name == "tangshm1k":
+        pcp_df = pcp_df_of_nickname("tangshm", sample_count=1000)
+    else:
+        pcp_df = pcp_df_of_nickname(dataset_name)
     return RSSHMBurrito(
         None,
         SHMoofDataset(pcp_df, kmer_length=model.kmer_length, site_count=site_count),
         model,
         **burrito_params,
-        device=device,
     )
 
 
