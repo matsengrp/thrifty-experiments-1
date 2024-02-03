@@ -122,6 +122,7 @@ def train_model(model_name, dataset_name, resume=True):
         SHMoofDataset(val_df, kmer_length=model.kmer_length, site_count=site_count),
         model,
         **burrito_params,
+        name=trained_model_str(model_name, dataset_name),
     )
 
     if dataset_name == "tst":
