@@ -79,11 +79,19 @@ def kmer_size_from_model_name(model_name):
 def create_model(model_name):
     if model_name == "fivemer":
         model = models.RSFivemerModel()
-    elif model_name.startswith("cnn_ind_"):
-        hparam_name = model_name[8:]
+    elif model_name.startswith("cnn_"):
+        model_name = model_name[4:]
+        hparam_name = model_name[4:]
         if hparam_name not in model_parameters:
             raise ValueError(f"Unknown hparam key: {hparam_name}")
-        model = models.IndepRSCNNModel(**model_parameters[hparam_name])
+        if model_name.startswith("ind_"):
+            model = models.IndepRSCNNModel(**model_parameters[hparam_name])
+        elif model_name.startswith("hyb_"):
+            model = models.HybridRSCNNModel(**model_parameters[hparam_name])
+        elif model_name.startswith("joi_"):
+            model = models.JoinedRSCNNModel(**model_parameters[hparam_name])
+        else:
+            raise ValueError(f"Unknown model key: {model_name}")
     else:
         raise ValueError(f"Unknown model key: {model_name}")
     return model
