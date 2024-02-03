@@ -82,7 +82,7 @@ def dataset_of_df(df, model_name):
 def create_model(model_name):
     # if model begins with _indep, then use IndepRSCNNModel
     if model_name.startswith("cnn_ind_"):
-        hparam_name = model_name[:-8]
+        hparam_name = model_name[8:]
         if hparam_name not in model_parameters:
             raise ValueError(f"Unknown hparam key: {hparam_name}")
         model = IndepRSCNNModel(**model_parameters[hparam_name])
@@ -99,18 +99,18 @@ burrito_params = {
 }
 
 
-def trained_model_str(model_name, data_nickname, training_method):
-    return f"{model_name}-{data_nickname}-{training_method}"
+def trained_model_str(model_name, data_nickname):
+    return f"{model_name}-{data_nickname}"
 
 
-def trained_model_path(model_name, data_nickname, training_method):
-    return f"trained_models/{trained_model_str(model_name, data_nickname, training_method)}"
+def trained_model_path(model_name, data_nickname):
+    return f"trained_models/{trained_model_str(model_name, data_nickname)}"
 
 
 def train_model(model_name, dataset_name, resume=True):
     shmoof, val_nickname = dataset_name.split("_")
     assert shmoof == "shmoof"
-    train_df, val_df = load_shmoof_dataframes(shmoof_path, val_nickname)
+    train_df, val_df = load_shmoof_dataframes(shmoof_path, val_nickname=val_nickname)
     out_prefix = trained_model_path(model_name, dataset_name)
     burrito_name = trained_model_str(model_name, dataset_name)
     model = create_model(model_name)

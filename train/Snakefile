@@ -1,0 +1,63 @@
+import os
+import random
+import sys
+import time
+import yaml
+
+from netam.framework import crepe_exists
+sys.path.append("..")
+from shmex.shm_zoo import train_model, write_test_accuracy, trained_model_str, trained_model_path
+
+configfile: "config.yml"
+
+model_names = config["model_names"]
+train_data_nicknames = config["train_data_nicknames"]
+test_data_nicknames = config["test_data_nicknames"]
+
+final_output_path = "_ignore/model_compare.csv"
+
+
+
+def trained_model_yml(model_name, data_nickname):
+    return f"{trained_model_path(model_name, data_nickname)}.yml"
+
+
+def test_output_path(model_name, data_nickname, dataset_name):
+    trained_model = trained_model_str(model_name, data_nickname)
+    return f"_ignore/test_output/{trained_model}-ON-{dataset_name}.csv"
+
+
+rule all:
+    input: final_output_path
+
+
+rule train_model:
+    output:
+        trained_model=trained_model_yml("{model_name}", "{data_nickname}")
+    run:
+        train_model(wildcards.model_name, wildcards.data_nickname)
+
+
+rule write_test_accuracy:
+    input:
+        trained_model=trained_model_yml("{model_name}", "{data_nickname}")
+    output:
+        test_output=test_output_path("{model_name}", "{data_nickname}", "{dataset_name}")
+    run:
+        crepe_prefix = os.path.splitext(input.trained_model)[0]
+        write_test_accuracy(crepe_prefix, wildcards.dataset_name, "_ignore/test_output")
+
+
+rule concatenate_csvs:
+    input:
+        csvs = [
+            test_output_path(m, d, td) 
+                for m in model_names 
+                for d in train_data_nicknames 
+                for td in test_data_nicknames]
+    output:
+        combined_csv = final_output_path
+    shell:
+        """
+        epam concatenate_csvs $(echo '{input.csvs}' | tr ' ' ',') {output.combined_csv}
+        """
