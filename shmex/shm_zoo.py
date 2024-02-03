@@ -1,13 +1,14 @@
 import os
-import random
 import sys
-import time
 
 import pandas as pd
 
 from netam.common import pick_device
 from netam.framework import load_crepe, SHMoofDataset, RSSHMBurrito
 from netam import models 
+
+import torch
+torch.set_num_threads(1)
 
 sys.path.append("..")
 from shmex.shm_data import load_shmoof_dataframes, pcp_df_of_nickname
@@ -19,7 +20,6 @@ shmoof_path = "~/data/shmoof_pcp_2023-11-30_MASKED.csv"
 site_count = 500
 epochs = 1000
 device = pick_device()
-
 
 model_parameters = {
     "sml": {
