@@ -7,9 +7,7 @@ import pandas as pd
 
 from netam.common import pick_device
 from netam.framework import load_crepe, SHMoofDataset, RSSHMBurrito
-from netam.models import (
-    IndepRSCNNModel,
-)
+from netam import models 
 
 sys.path.append("..")
 from shmex.shm_data import load_shmoof_dataframes, pcp_df_of_nickname, dataset_by_kmer_length_of
@@ -70,22 +68,22 @@ model_parameters = {
 
 kmer_size_from_model_type = {
     "cnn": 3,
+    "fivemer": 5,
 }
+
 
 def kmer_size_from_model_name(model_name):
     return kmer_size_from_model_type[model_name.split("_")[-1]]
 
-# TODO kill this
-def dataset_of_df(df, model_name):
-    return SHMoofDataset(df, kmer_length=kmer_size_from_model_name(model_name), site_count=site_count)
 
 def create_model(model_name):
-    # if model begins with _indep, then use IndepRSCNNModel
-    if model_name.startswith("cnn_ind_"):
+    if model_name == "fivemer":
+        model = models.RSFivemerModel()
+    elif model_name.startswith("cnn_ind_"):
         hparam_name = model_name[8:]
         if hparam_name not in model_parameters:
             raise ValueError(f"Unknown hparam key: {hparam_name}")
-        model = IndepRSCNNModel(**model_parameters[hparam_name])
+        model = models.IndepRSCNNModel(**model_parameters[hparam_name])
     else:
         raise ValueError(f"Unknown model key: {model_name}")
     return model
