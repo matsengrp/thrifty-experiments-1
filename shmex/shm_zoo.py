@@ -3,7 +3,7 @@ import sys
 
 import pandas as pd
 
-from netam.common import pick_device
+from netam.common import pick_device, parameter_count_of_model
 from netam.framework import load_crepe, SHMoofDataset, RSSHMBurrito
 from netam import models 
 
@@ -171,6 +171,7 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
         {
             "crepe_prefix": [crepe_prefix],
             "crepe_basename": [crepe_basename],
+            "parameter_count": [parameter_count_of_model(val_burrito.model)],
             "dataset_name": [dataset_name],
             "bce_loss": [bce_loss.item()],
             "csp_loss": [csp_loss.item()],
