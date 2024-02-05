@@ -79,6 +79,8 @@ def kmer_size_from_model_name(model_name):
 def create_model(model_name):
     if model_name == "fivemer":
         model = models.RSFivemerModel()
+    elif model_name == "rsshmoof":
+        model = models.RSSHMoofModel(kmer_length=5, site_count=site_count)
     elif model_name.startswith("cnn_"):
         model_name = model_name[4:]
         hparam_name = model_name[4:]
