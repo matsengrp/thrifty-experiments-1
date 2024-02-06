@@ -158,3 +158,4 @@ _ignore/
 _logs/
 netam
 .snakemake
+performance-eval/*.csv
