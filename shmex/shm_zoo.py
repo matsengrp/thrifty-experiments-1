@@ -188,13 +188,11 @@ def pcp_df_of_shm_name(dataset_name):
     return pcp_df
 
 
+# TODO shouldn't base_indicator actually be base_idx everywhere?
 def ragged_np_mutation_and_base_indicators(parents, children):
     mutation_indicator_list = []
     base_indicator_list = []
-    for (
-        parent,
-        child,
-    ) in zip(parents, children):
+    for parent, child in zip(parents, children):
         mutation_indicators, base_indicators = create_mutation_and_base_indicators(
             parent, child
         )
@@ -223,6 +221,19 @@ def mut_accuracy_stats(mutation_indicator_list, rates_list, informative_site_cou
     }
 
 
+def base_accuracy_stats(base_indicator_list, csp_list):
+    filtered_base_indicator_list = []
+    filtered_csp_list = []
+    for base_indicator, csp in zip(base_indicator_list, csp_list):
+        filtered_base_indicator_list.append(base_indicator[base_indicator != -1])
+        filtered_csp_list.append(csp[base_indicator != -1])
+    all_base_indicators = np.concatenate(filtered_base_indicator_list)
+    all_csps = np.concatenate(filtered_csp_list)
+    all_predictions = all_csps.argmax(axis=-1).squeeze()
+    accuracy = (all_base_indicators == all_predictions).mean()
+    return {"sub_acc": accuracy}
+    
+
 def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
     val_burrito = validation_burrito_of(crepe_prefix, dataset_name)
     bce_loss, csp_loss = val_burrito.evaluate()
@@ -236,6 +247,7 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
     )
     informative_site_counts = [informative_site_count(seq) for seq in pcp_df["parent"]]
     mut_stats = mut_accuracy_stats(mut_indicators, rates, informative_site_counts)
+    sub_stats = base_accuracy_stats(base_indicators, csps)
     df_dict = {
         "crepe_prefix": crepe_prefix,
         "crepe_basename": crepe_basename,
@@ -245,6 +257,7 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
         "csp_loss": csp_loss.item(),
     }
     df_dict.update(mut_stats)
+    df_dict.update(sub_stats)
     df = pd.DataFrame(df_dict, index=[0])
     df.to_csv(
         f"{directory}/{crepe_basename}-ON-{dataset_name}.csv",
