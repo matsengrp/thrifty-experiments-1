@@ -5,7 +5,9 @@ import pandas as pd
 from netam import framework
 
 
-def load_shmoof_dataframes(csv_path, sample_count=None, val_nickname="13", random_seed=42):
+def load_shmoof_dataframes(
+    csv_path, sample_count=None, val_nickname="13", random_seed=42
+):
     """Load the shmoof dataframes from the csv_path and return train and validation dataframes.
 
     Args:

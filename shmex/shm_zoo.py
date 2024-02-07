@@ -6,11 +6,18 @@ import pandas as pd
 from sklearn import metrics
 
 import torch
+
 torch.set_num_threads(1)
 
 from netam.common import informative_site_count, pick_device, parameter_count_of_model
-from netam.framework import create_mutation_and_base_indicators, load_crepe, trimmed_shm_model_outputs_of_crepe, SHMoofDataset, RSSHMBurrito
-from netam import models 
+from netam.framework import (
+    create_mutation_and_base_indicators,
+    load_crepe,
+    trimmed_shm_model_outputs_of_crepe,
+    SHMoofDataset,
+    RSSHMBurrito,
+)
+from netam import models
 
 from shmple.evaluate import r_precision
 
@@ -67,7 +74,7 @@ model_parameters = {
         "embedding_dim": 14,
         "filter_count": 25,
         "dropout_prob": 0.0,
-    }
+    },
 }
 
 kmer_size_from_model_type = {
@@ -127,7 +134,9 @@ def train_model(model_name, dataset_name, resume=True):
         sample_count = None
         shmoof, val_nickname = dataset_name.split("_")
         assert shmoof == "shmoof"
-    train_df, val_df = load_shmoof_dataframes(shmoof_path, sample_count=sample_count, val_nickname=val_nickname)
+    train_df, val_df = load_shmoof_dataframes(
+        shmoof_path, sample_count=sample_count, val_nickname=val_nickname
+    )
     out_prefix = trained_model_path(model_name, dataset_name)
     # burrito_name = trained_model_str(model_name, dataset_name)
     model = create_model(model_name)
@@ -167,6 +176,7 @@ def validation_burrito_of(crepe_prefix, dataset_name):
         **burrito_params,
     )
 
+
 def pcp_df_of_shm_name(dataset_name):
     if dataset_name.startswith("shmoof_"):
         _, val_nickname = dataset_name.split("_")
@@ -181,8 +191,13 @@ def pcp_df_of_shm_name(dataset_name):
 def ragged_np_mutation_and_base_indicators(parents, children):
     mutation_indicator_list = []
     base_indicator_list = []
-    for parent, child, in zip(parents, children):
-        mutation_indicators, base_indicators = create_mutation_and_base_indicators(parent, child)
+    for (
+        parent,
+        child,
+    ) in zip(parents, children):
+        mutation_indicators, base_indicators = create_mutation_and_base_indicators(
+            parent, child
+        )
         mutation_indicator_list.append(mutation_indicators.numpy())
         base_indicator_list.append(base_indicators.numpy())
     return mutation_indicator_list, base_indicator_list
@@ -190,8 +205,15 @@ def ragged_np_mutation_and_base_indicators(parents, children):
 
 def mut_accuracy_stats(mutation_indicator_list, rates_list, informative_site_counts):
     # TODO check this with a fresh brain
-    mut_freqs = [m.sum() / c for m, c in zip(mutation_indicator_list, informative_site_counts)]
-    seqs_mutabilities = [rates[:len(indicator)]*mut_freq for indicator, rates, mut_freq in zip(mutation_indicator_list, rates_list, mut_freqs)]
+    mut_freqs = [
+        m.sum() / c for m, c in zip(mutation_indicator_list, informative_site_counts)
+    ]
+    seqs_mutabilities = [
+        rates[: len(indicator)] * mut_freq
+        for indicator, rates, mut_freq in zip(
+            mutation_indicator_list, rates_list, mut_freqs
+        )
+    ]
     all_mutabilities = np.concatenate(seqs_mutabilities)
     all_indicators = np.concatenate(mutation_indicator_list)
     return {
@@ -209,17 +231,19 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
     crepe = load_crepe(crepe_prefix)
     pcp_df = pcp_df_of_shm_name(dataset_name)
     rates, csps = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
-    mut_indicators, base_indicators = ragged_np_mutation_and_base_indicators(pcp_df["parent"], pcp_df["child"])
+    mut_indicators, base_indicators = ragged_np_mutation_and_base_indicators(
+        pcp_df["parent"], pcp_df["child"]
+    )
     informative_site_counts = [informative_site_count(seq) for seq in pcp_df["parent"]]
     mut_stats = mut_accuracy_stats(mut_indicators, rates, informative_site_counts)
     df_dict = {
-            "crepe_prefix": crepe_prefix,
-            "crepe_basename": crepe_basename,
-            "parameter_count": parameter_count_of_model(val_burrito.model),
-            "dataset_name": dataset_name,
-            "bce_loss": bce_loss.item(),
-            "csp_loss": csp_loss.item(),
-        }
+        "crepe_prefix": crepe_prefix,
+        "crepe_basename": crepe_basename,
+        "parameter_count": parameter_count_of_model(val_burrito.model),
+        "dataset_name": dataset_name,
+        "bce_loss": bce_loss.item(),
+        "csp_loss": csp_loss.item(),
+    }
     df_dict.update(mut_stats)
     df = pd.DataFrame(df_dict, index=[0])
     df.to_csv(
