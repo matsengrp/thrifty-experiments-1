@@ -222,17 +222,15 @@ def mut_accuracy_stats(mutation_indicator_list, rates_list, informative_site_cou
 
 
 def base_accuracy_stats(base_indicator_list, csp_list):
-    filtered_base_indicator_list = []
-    filtered_csp_list = []
-    for base_indicator, csp in zip(base_indicator_list, csp_list):
-        filtered_base_indicator_list.append(base_indicator[base_indicator != -1])
-        filtered_csp_list.append(csp[base_indicator != -1])
-    all_base_indicators = np.concatenate(filtered_base_indicator_list)
-    all_csps = np.concatenate(filtered_csp_list)
-    all_predictions = all_csps.argmax(axis=-1).squeeze()
-    accuracy = (all_base_indicators == all_predictions).mean()
-    return {"sub_acc": accuracy}
-    
+    filtered_base_indicators = np.concatenate(
+        [indicator[indicator != -1] for indicator in base_indicator_list]
+    )
+    filtered_csps = np.concatenate(
+        [csp[indicator != -1] for indicator, csp in zip(base_indicator_list, csp_list)]
+    )
+    all_predictions = filtered_csps.argmax(axis=-1)
+    return {"sub_acc": (filtered_base_indicators == all_predictions).mean()}
+
 
 def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
     val_burrito = validation_burrito_of(crepe_prefix, dataset_name)
