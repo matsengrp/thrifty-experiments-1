@@ -8,7 +8,7 @@ from sklearn import metrics
 import torch
 torch.set_num_threads(1)
 
-from netam.common import pick_device, parameter_count_of_model
+from netam.common import informative_site_count, pick_device, parameter_count_of_model
 from netam.framework import create_mutation_and_base_indicators, load_crepe, trimmed_shm_model_outputs_of_crepe, SHMoofDataset, RSSHMBurrito
 from netam import models 
 
@@ -188,9 +188,9 @@ def ragged_np_mutation_and_base_indicators(parents, children):
     return mutation_indicator_list, base_indicator_list
 
 
-def mut_accuracy_stats(mutation_indicator_list, rates_list):
+def mut_accuracy_stats(mutation_indicator_list, rates_list, informative_site_counts):
     # TODO check this with a fresh brain
-    mut_freqs = [m.sum() / m.size for m in mutation_indicator_list]
+    mut_freqs = [m.sum() / c for m, c in zip(mutation_indicator_list, informative_site_counts)]
     seqs_mutabilities = [rates[:len(indicator)]*mut_freq for indicator, rates, mut_freq in zip(mutation_indicator_list, rates_list, mut_freqs)]
     all_mutabilities = np.concatenate(seqs_mutabilities)
     all_indicators = np.concatenate(mutation_indicator_list)
@@ -210,7 +210,8 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
     pcp_df = pcp_df_of_shm_name(dataset_name)
     rates, csps = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
     mut_indicators, base_indicators = ragged_np_mutation_and_base_indicators(pcp_df["parent"], pcp_df["child"])
-    mut_stats = mut_accuracy_stats(mut_indicators, rates)
+    informative_site_counts = [informative_site_count(seq) for seq in pcp_df["parent"]]
+    mut_stats = mut_accuracy_stats(mut_indicators, rates, informative_site_counts)
     df_dict = {
             "crepe_prefix": crepe_prefix,
             "crepe_basename": crepe_basename,
