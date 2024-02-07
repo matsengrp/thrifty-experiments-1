@@ -5,7 +5,7 @@ import pandas as pd
 from netam import framework
 
 
-def load_shmoof_dataframes(csv_path, sample_count=None, val_nickname="13"):
+def load_shmoof_dataframes(csv_path, sample_count=None, val_nickname="13", random_seed=42):
     """Load the shmoof dataframes from the csv_path and return train and validation dataframes.
 
     Args:
@@ -40,7 +40,7 @@ def load_shmoof_dataframes(csv_path, sample_count=None, val_nickname="13"):
         full_shmoof_df = full_shmoof_df.sample(sample_count)
 
     if val_nickname == "split":
-        train_df = full_shmoof_df.sample(frac=0.8)
+        train_df = full_shmoof_df.sample(frac=0.8, random_state=random_seed)
         val_df = full_shmoof_df.drop(train_df.index)
         return train_df, val_df
 
