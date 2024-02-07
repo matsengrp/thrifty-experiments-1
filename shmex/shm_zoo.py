@@ -1,14 +1,18 @@
 import os
 import sys
 
+import numpy as np
 import pandas as pd
-
-from netam.common import pick_device, parameter_count_of_model
-from netam.framework import load_crepe, SHMoofDataset, RSSHMBurrito
-from netam import models 
+from sklearn import metrics
 
 import torch
 torch.set_num_threads(1)
+
+from netam.common import pick_device, parameter_count_of_model
+from netam.framework import create_mutation_and_base_indicators, load_crepe, trimmed_shm_model_outputs_of_crepe, SHMoofDataset, RSSHMBurrito
+from netam import models 
+
+from shmple.evaluate import r_precision
 
 sys.path.append("..")
 from shmex.shm_data import load_shmoof_dataframes, pcp_df_of_nickname
@@ -145,6 +149,7 @@ def train_model(model_name, dataset_name, resume=True):
     return model
 
 
+# TODO this should go away
 def validation_burrito_of(crepe_prefix, dataset_name):
     crepe = load_crepe(crepe_prefix)
     model = crepe.model
@@ -162,21 +167,60 @@ def validation_burrito_of(crepe_prefix, dataset_name):
         **burrito_params,
     )
 
+def pcp_df_of_shm_name(dataset_name):
+    if dataset_name.startswith("shmoof_"):
+        _, val_nickname = dataset_name.split("_")
+        _, pcp_df = load_shmoof_dataframes(shmoof_path, val_nickname=val_nickname)
+    elif dataset_name == "tangshm1k":
+        pcp_df = pcp_df_of_nickname("tangshm", sample_count=1000)
+    else:
+        pcp_df = pcp_df_of_nickname(dataset_name)
+    return pcp_df
+
+
+def ragged_np_mutation_and_base_indicators(parents, children):
+    mutation_indicator_list = []
+    base_indicator_list = []
+    for parent, child, in zip(parents, children):
+        mutation_indicators, base_indicators = create_mutation_and_base_indicators(parent, child)
+        mutation_indicator_list.append(mutation_indicators.numpy())
+        base_indicator_list.append(base_indicators.numpy())
+    return mutation_indicator_list, base_indicator_list
+
+
+def mut_accuracy_stats(mutation_indicator_list, rates_list):
+    # TODO check this with a fresh brain
+    mut_freqs = [m.sum() / m.size for m in mutation_indicator_list]
+    seqs_mutabilities = [rates[:len(indicator)]*mut_freq for indicator, rates, mut_freq in zip(mutation_indicator_list, rates_list, mut_freqs)]
+    all_mutabilities = np.concatenate(seqs_mutabilities)
+    all_indicators = np.concatenate(mutation_indicator_list)
+    return {
+        "AUROC": metrics.roc_auc_score(all_indicators, all_mutabilities),
+        "AUPRC": metrics.average_precision_score(all_indicators, all_mutabilities),
+        "r-prec": r_precision(mutation_indicator_list, seqs_mutabilities),
+    }
+
 
 def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
     val_burrito = validation_burrito_of(crepe_prefix, dataset_name)
     bce_loss, csp_loss = val_burrito.evaluate()
     crepe_basename = os.path.basename(crepe_prefix)
-    df = pd.DataFrame(
-        {
-            "crepe_prefix": [crepe_prefix],
-            "crepe_basename": [crepe_basename],
-            "parameter_count": [parameter_count_of_model(val_burrito.model)],
-            "dataset_name": [dataset_name],
-            "bce_loss": [bce_loss.item()],
-            "csp_loss": [csp_loss.item()],
+    # TODO clean up
+    crepe = load_crepe(crepe_prefix)
+    pcp_df = pcp_df_of_shm_name(dataset_name)
+    rates, csps = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
+    mut_indicators, base_indicators = ragged_np_mutation_and_base_indicators(pcp_df["parent"], pcp_df["child"])
+    mut_stats = mut_accuracy_stats(mut_indicators, rates)
+    df_dict = {
+            "crepe_prefix": crepe_prefix,
+            "crepe_basename": crepe_basename,
+            "parameter_count": parameter_count_of_model(val_burrito.model),
+            "dataset_name": dataset_name,
+            "bce_loss": bce_loss.item(),
+            "csp_loss": csp_loss.item(),
         }
-    )
+    df_dict.update(mut_stats)
+    df = pd.DataFrame(df_dict, index=[0])
     df.to_csv(
         f"{directory}/{crepe_basename}-ON-{dataset_name}.csv",
         index=False,
