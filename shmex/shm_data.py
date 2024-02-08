@@ -36,8 +36,7 @@ def load_shmoof_dataframes(
     full_shmoof_df = pd.read_csv(csv_path, index_col=0).reset_index(drop=True)
 
     # only keep rows where parent is different than child
-    # TODO temporary
-    # full_shmoof_df = full_shmoof_df[full_shmoof_df["parent"] != full_shmoof_df["child"]]
+    full_shmoof_df = full_shmoof_df[full_shmoof_df["parent"] != full_shmoof_df["child"]]
 
     if sample_count is not None:
         full_shmoof_df = full_shmoof_df.sample(sample_count)

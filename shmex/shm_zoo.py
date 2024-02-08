@@ -138,7 +138,6 @@ def train_model(model_name, dataset_name, resume=True):
         shmoof_path, sample_count=sample_count, val_nickname=val_nickname
     )
     out_prefix = trained_model_path(model_name, dataset_name)
-    # burrito_name = trained_model_str(model_name, dataset_name)
     model = create_model(model_name)
     burrito = RSSHMBurrito(
         SHMoofDataset(train_df, kmer_length=model.kmer_length, site_count=site_count),
@@ -249,7 +248,7 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
     df_dict = {
         "crepe_prefix": crepe_prefix,
         "crepe_basename": crepe_basename,
-        "parameter_count": parameter_count_of_model(val_burrito.model),
+        "parameter_count": parameter_count_of_model(crepe.model),
         "dataset_name": dataset_name,
         "bce_loss": bce_loss.item(),
         "csp_loss": csp_loss.item(),
