@@ -9,7 +9,11 @@ import torch
 
 torch.set_num_threads(1)
 
-from netam.common import informative_site_count, pick_device, parameter_count_of_model
+from netam.common import (
+    mask_tensor_of,
+    pick_device,
+    parameter_count_of_model,
+)
 from netam.framework import (
     create_mutation_and_base_indicators,
     load_crepe,
@@ -169,35 +173,41 @@ def pcp_df_of_shm_name(dataset_name):
 
 
 # TODO shouldn't base_indicator actually be base_idx everywhere?
-def ragged_np_mutation_and_base_indicators(parents, children):
+def ragged_np_pcp_info(parents, children):
     mutation_indicator_list = []
     base_indicator_list = []
+    mask_list = []
     for parent, child in zip(parents, children):
         mutation_indicators, base_indicators = create_mutation_and_base_indicators(
             parent, child
         )
         mutation_indicator_list.append(mutation_indicators.numpy())
         base_indicator_list.append(base_indicators.numpy())
-    return mutation_indicator_list, base_indicator_list
+        mask_list.append(mask_tensor_of(parent).numpy())
+    return mutation_indicator_list, base_indicator_list, mask_list
 
 
-def mut_accuracy_stats(mutation_indicator_list, rates_list, informative_site_counts):
-    # TODO check this with a fresh brain
+def mut_accuracy_stats(mutation_indicator_list, rates_list, mask_list):
     mut_freqs = [
-        m.sum() / c for m, c in zip(mutation_indicator_list, informative_site_counts)
+        indic.sum() / mask.sum()
+        for indic, mask in zip(mutation_indicator_list, mask_list)
     ]
-    seqs_mutabilities = [
+    rates_list = [
         rates[: len(indicator)] * mut_freq
         for indicator, rates, mut_freq in zip(
             mutation_indicator_list, rates_list, mut_freqs
         )
     ]
-    all_mutabilities = np.concatenate(seqs_mutabilities)
+    rates_list = [rates[mask] for rates, mask in zip(rates_list, mask_list)]
+    mutation_indicator_list = [
+        indicator[mask] for indicator, mask in zip(mutation_indicator_list, mask_list)
+    ]
+    all_mutabilities = np.concatenate(rates_list)
     all_indicators = np.concatenate(mutation_indicator_list)
     return {
         "AUROC": metrics.roc_auc_score(all_indicators, all_mutabilities),
         "AUPRC": metrics.average_precision_score(all_indicators, all_mutabilities),
-        "r-prec": r_precision(mutation_indicator_list, seqs_mutabilities),
+        "r-prec": r_precision(mutation_indicator_list, rates_list),
     }
 
 
@@ -217,17 +227,16 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
     crepe = load_crepe(crepe_prefix)
     pcp_df = pcp_df_of_shm_name(dataset_name)
     rates, csps = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
-    mut_indicators, base_indicators = ragged_np_mutation_and_base_indicators(
+    mut_indicators, base_indicators, masks = ragged_np_pcp_info(
         pcp_df["parent"], pcp_df["child"]
     )
-    informative_site_counts = [informative_site_count(seq) for seq in pcp_df["parent"]]
     df_dict = {
         "crepe_prefix": crepe_prefix,
         "crepe_basename": crepe_basename,
         "parameter_count": parameter_count_of_model(crepe.model),
         "dataset_name": dataset_name,
     }
-    df_dict.update(mut_accuracy_stats(mut_indicators, rates, informative_site_counts))
+    df_dict.update(mut_accuracy_stats(mut_indicators, rates, masks))
     df_dict.update(base_accuracy_stats(base_indicators, csps))
     df = pd.DataFrame(df_dict, index=[0])
     df.to_csv(
