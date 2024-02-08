@@ -157,25 +157,6 @@ def train_model(model_name, dataset_name, resume=True):
     return model
 
 
-# TODO this should go away
-def validation_burrito_of(crepe_prefix, dataset_name):
-    crepe = load_crepe(crepe_prefix)
-    model = crepe.model
-    if dataset_name.startswith("shmoof_"):
-        _, val_nickname = dataset_name.split("_")
-        _, pcp_df = load_shmoof_dataframes(shmoof_path, val_nickname=val_nickname)
-    elif dataset_name == "tangshm1k":
-        pcp_df = pcp_df_of_nickname("tangshm", sample_count=1000)
-    else:
-        pcp_df = pcp_df_of_nickname(dataset_name)
-    return RSSHMBurrito(
-        None,
-        SHMoofDataset(pcp_df, kmer_length=model.kmer_length, site_count=site_count),
-        model,
-        **burrito_params,
-    )
-
-
 def pcp_df_of_shm_name(dataset_name):
     if dataset_name.startswith("shmoof_"):
         _, val_nickname = dataset_name.split("_")
@@ -232,10 +213,7 @@ def base_accuracy_stats(base_indicator_list, csp_list):
 
 
 def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
-    val_burrito = validation_burrito_of(crepe_prefix, dataset_name)
-    bce_loss, csp_loss = val_burrito.evaluate()
     crepe_basename = os.path.basename(crepe_prefix)
-    # TODO clean up
     crepe = load_crepe(crepe_prefix)
     pcp_df = pcp_df_of_shm_name(dataset_name)
     rates, csps = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
@@ -243,18 +221,14 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
         pcp_df["parent"], pcp_df["child"]
     )
     informative_site_counts = [informative_site_count(seq) for seq in pcp_df["parent"]]
-    mut_stats = mut_accuracy_stats(mut_indicators, rates, informative_site_counts)
-    sub_stats = base_accuracy_stats(base_indicators, csps)
     df_dict = {
         "crepe_prefix": crepe_prefix,
         "crepe_basename": crepe_basename,
         "parameter_count": parameter_count_of_model(crepe.model),
         "dataset_name": dataset_name,
-        "bce_loss": bce_loss.item(),
-        "csp_loss": csp_loss.item(),
     }
-    df_dict.update(mut_stats)
-    df_dict.update(sub_stats)
+    df_dict.update(mut_accuracy_stats(mut_indicators, rates, informative_site_counts))
+    df_dict.update(base_accuracy_stats(base_indicators, csps))
     df = pd.DataFrame(df_dict, index=[0])
     df.to_csv(
         f"{directory}/{crepe_basename}-ON-{dataset_name}.csv",
