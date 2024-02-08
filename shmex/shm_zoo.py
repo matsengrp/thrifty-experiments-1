@@ -26,12 +26,11 @@ from netam import models
 from shmple.evaluate import r_precision
 
 sys.path.append("..")
-from shmex.shm_data import load_shmoof_dataframes, pcp_df_of_nickname
+from shmex.shm_data import train_test_dfs_of_nickname
 
 # Very helpful for debugging!
 # torch.autograd.set_detect_anomaly(True)
 
-shmoof_path = "~/data/shmoof_pcp_2023-11-30_MASKED.csv"
 site_count = 500
 epochs = 1000
 device = pick_device()
@@ -131,16 +130,7 @@ def trained_model_path(model_name, data_nickname):
 
 
 def train_model(model_name, dataset_name, resume=True):
-    if dataset_name == "tst":
-        sample_count = 1000
-        val_nickname = "small"
-    else:
-        sample_count = None
-        shmoof, val_nickname = dataset_name.split("_")
-        assert shmoof == "shmoof"
-    train_df, val_df = load_shmoof_dataframes(
-        shmoof_path, sample_count=sample_count, val_nickname=val_nickname
-    )
+    train_df, val_df = train_test_dfs_of_nickname(dataset_name)
     out_prefix = trained_model_path(model_name, dataset_name)
     model = create_model(model_name)
     burrito = RSSHMBurrito(
@@ -160,16 +150,7 @@ def train_model(model_name, dataset_name, resume=True):
 
     return model
 
-
-def pcp_df_of_shm_name(dataset_name):
-    if dataset_name.startswith("shmoof_"):
-        _, val_nickname = dataset_name.split("_")
-        _, pcp_df = load_shmoof_dataframes(shmoof_path, val_nickname=val_nickname)
-    elif dataset_name == "tangshm1k":
-        pcp_df = pcp_df_of_nickname("tangshm", sample_count=1000)
-    else:
-        pcp_df = pcp_df_of_nickname(dataset_name)
-    return pcp_df
+# TODO move this to a shm_evaluation or something
 
 
 # TODO shouldn't base_indicator actually be base_idx everywhere?

@@ -5,6 +5,9 @@ import pandas as pd
 from netam import framework
 
 
+shmoof_path = "~/data/shmoof_pcp_2023-11-30_MASKED.csv"
+
+
 def load_shmoof_dataframes(
     csv_path, sample_count=None, val_nickname="13", random_seed=42
 ):
@@ -63,7 +66,8 @@ def load_shmoof_dataframes(
 
 def pcp_df_of_nickname(dataset_name, sample_count=None):
     dataset_dict = {
-        "tangshm": "data/tang-deepshm_size2_edges_22-May-2023.branch_length.csv"
+        "tangshm": "data/tang-deepshm_size2_edges_22-May-2023.branch_length.csv",
+        "cui": "data/cui-et-al-oof_pcp_2024-02-07_MASKED_NI.csv",
     }
 
     def localify(path):
@@ -80,3 +84,35 @@ def pcp_df_of_nickname(dataset_name, sample_count=None):
     pcp_df = pcp_df.reset_index(drop=True)
 
     return pcp_df
+
+
+# TODO clean this up?
+def pcp_df_of_shm_name(dataset_name):
+    if dataset_name.startswith("shmoof_"):
+        _, val_nickname = dataset_name.split("_")
+        _, pcp_df = load_shmoof_dataframes(shmoof_path, val_nickname=val_nickname)
+    elif dataset_name == "tangshm1k":
+        pcp_df = pcp_df_of_nickname("tangshm", sample_count=1000)
+    else:
+        pcp_df = pcp_df_of_nickname(dataset_name)
+    return pcp_df
+
+
+def train_test_dfs_of_nickname(dataset_name):
+    if dataset_name == "cui": 
+        full_df = pcp_df_of_nickname("cui")
+        val_df = full_df[full_df["sample_id"] == "NP+GC1_BC9_IGK_Export_2017-02-02"]
+        train_df = full_df.drop(val_df.index)
+        return train_df, val_df
+    # else we are doing a shmoof dataset
+    if dataset_name == "tst":
+        sample_count = 1000
+        val_nickname = "small"
+    else:
+        sample_count = None
+        shmoof, val_nickname = dataset_name.split("_")
+        assert shmoof == "shmoof"
+    train_df, val_df = load_shmoof_dataframes(
+        shmoof_path, sample_count=sample_count, val_nickname=val_nickname
+    )
+    return train_df, val_df
