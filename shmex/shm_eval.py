@@ -69,19 +69,28 @@ def mut_accuracy_stats(mutation_indicator_list, rates_list, mask_list):
         "AUROC": metrics.roc_auc_score(all_indicators, all_mutabilities),
         "AUPRC": metrics.average_precision_score(all_indicators, all_mutabilities),
         "r-prec": r_precision(mutation_indicator_list, rates_list),
-        "BCE": metrics.log_loss(all_indicators, all_mutabilities, labels=[0, 1]),
+        "mut_pos_xent": metrics.log_loss(all_indicators, all_mutabilities, labels=[0, 1]),
     }
 
 
 def base_accuracy_stats(base_idxs_list, csp_list):
-    filtered_base_idxs_list = np.concatenate(
+    filtered_base_idxs_arr = np.concatenate(
         [indicator[indicator != -1] for indicator in base_idxs_list]
     )
-    filtered_csp_list = np.concatenate(
+    filtered_csp_arr = np.concatenate(
         [csp[indicator != -1] for indicator, csp in zip(base_idxs_list, csp_list)]
     )
-    all_predictions = filtered_csp_list.argmax(axis=-1)
-    return {"sub_acc": (filtered_base_idxs_list == all_predictions).mean()}
+    
+    all_predictions = filtered_csp_arr.argmax(axis=-1)
+    accuracy = (filtered_base_idxs_arr == all_predictions).mean()
+    
+    # Prepare the true labels in the format expected by log_loss: one-hot encoded vectors
+    # Since filtered_base_idxs_list contains class indices from 0 to 3, use them to create one-hot encodings
+    num_classes = 4
+    true_labels_one_hot = np.eye(num_classes)[filtered_base_idxs_arr.astype(int)]
+    cat_cross_entropy = metrics.log_loss(true_labels_one_hot, filtered_csp_arr)
+    
+    return {"sub_acc": accuracy, "base_xent": cat_cross_entropy}
 
 
 def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
