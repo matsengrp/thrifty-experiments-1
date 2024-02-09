@@ -5,11 +5,15 @@ Experiments with [netam](https://github.com/matsengrp/netam)
 
 ## TODOs
 
+* consider loss weights
+
+* run grieff
+
+* what are the most interesting differences with a 5mer?
 * look at prob_sums_too_big for a single example
 * we could redefine things to return a selection factor rather than log selection factor
 * we assume that if a sequence is N in the child it is also N in the parent
 
-* make a per-NT model
 * does performance depend on N padding?
 * For branch length, the best approach is to optimize and normalize a given site of a given sequence to 1
 * Think about boundary cases of beginning and end of sequence

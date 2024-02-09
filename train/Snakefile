@@ -8,13 +8,14 @@ from netam.framework import crepe_exists
 sys.path.append("..")
 from shmex.shm_zoo import train_model, write_test_accuracy, trained_model_str, trained_model_path
 
-configfile: "config.yml"
+configfile: "config_human.yml"
 
+species = config["species"]
 model_names = config["model_names"]
 train_data_nicknames = config["train_data_nicknames"]
 test_data_nicknames = config["test_data_nicknames"]
 
-final_output_path = "_ignore/model_compare.csv"
+final_output_path = f"_ignore/{species}_model_compare.csv"
 
 
 
