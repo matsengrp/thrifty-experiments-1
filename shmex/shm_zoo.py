@@ -26,7 +26,7 @@ from netam import models
 from shmple.evaluate import r_precision
 
 sys.path.append("..")
-from shmex.shm_data import train_test_dfs_of_nickname
+from shmex.shm_data import train_test_dfs_of_nickname, pcp_df_of_shm_name
 
 # Very helpful for debugging!
 # torch.autograd.set_detect_anomaly(True)
