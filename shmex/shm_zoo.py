@@ -26,7 +26,7 @@ from netam import models
 from shmple.evaluate import r_precision
 
 sys.path.append("..")
-from shmex.shm_data import train_test_dfs_of_nickname, pcp_df_of_shm_name
+from shmex.shm_data import train_test_dfs_of_nickname
 
 # Very helpful for debugging!
 # torch.autograd.set_detect_anomaly(True)
@@ -206,7 +206,7 @@ def base_accuracy_stats(base_indicator_list, csp_list):
 def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
     crepe_basename = os.path.basename(crepe_prefix)
     crepe = load_crepe(crepe_prefix)
-    pcp_df = pcp_df_of_shm_name(dataset_name)
+    _, pcp_df = train_test_dfs_of_nickname(dataset_name)
     rates, csps = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
     mut_indicators, base_indicators, masks = ragged_np_pcp_info(
         pcp_df["parent"], pcp_df["child"]

@@ -5,7 +5,17 @@ import pandas as pd
 from netam import framework
 
 
-shmoof_path = "~/data/shmoof_pcp_2023-11-30_MASKED.csv"
+dataset_dict = {
+    "shmoof": "data/shmoof_pcp_2023-11-30_MASKED.csv",
+    "tangshm": "data/tang-deepshm_size2_edges_22-May-2023.branch_length.csv",
+    "cui": "data/cui-et-al-oof_pcp_2024-02-07_MASKED_NI.csv",
+}
+
+def localify(path):
+    home_dir = os.path.expanduser("~")
+    return os.path.join(home_dir, path)
+
+dataset_dict = {name: localify(path) for name, path in dataset_dict.items()}
 
 
 def load_shmoof_dataframes(
@@ -64,17 +74,7 @@ def load_shmoof_dataframes(
     return train_df, val_df
 
 
-def pcp_df_of_nickname(dataset_name, sample_count=None):
-    dataset_dict = {
-        "tangshm": "data/tang-deepshm_size2_edges_22-May-2023.branch_length.csv",
-        "cui": "data/cui-et-al-oof_pcp_2024-02-07_MASKED_NI.csv",
-    }
-
-    def localify(path):
-        home_dir = os.path.expanduser("~")
-        return os.path.join(home_dir, path)
-
-    dataset_dict = {name: localify(path) for name, path in dataset_dict.items()}
+def pcp_df_of_non_shmoof_nickname(dataset_name, sample_count=None):
     print(f"Loading {dataset_dict[dataset_name]}")
 
     pcp_df = pd.read_csv(dataset_dict[dataset_name], index_col=0)
@@ -86,24 +86,24 @@ def pcp_df_of_nickname(dataset_name, sample_count=None):
     return pcp_df
 
 
-# TODO clean this up?
-def pcp_df_of_shm_name(dataset_name):
-    if dataset_name.startswith("shmoof_"):
-        _, val_nickname = dataset_name.split("_")
-        _, pcp_df = load_shmoof_dataframes(shmoof_path, val_nickname=val_nickname)
-    elif dataset_name == "tangshm1k":
-        pcp_df = pcp_df_of_nickname("tangshm", sample_count=1000)
-    else:
-        pcp_df = pcp_df_of_nickname(dataset_name)
-    return pcp_df
-
-
 def train_test_dfs_of_nickname(dataset_name):
+    """
+    Returns the train and validation dataframes for the given dataset_name.
+    
+    What's a little confusing here is that some of the datasets are only used
+    for test, so this function will return None for the train_df in those cases.
+    """
     if dataset_name == "cui": 
-        full_df = pcp_df_of_nickname("cui")
+        full_df = pcp_df_of_non_shmoof_nickname("cui")
         val_df = full_df[full_df["sample_id"] == "NP+GC1_BC9_IGK_Export_2017-02-02"]
         train_df = full_df.drop(val_df.index)
         return train_df, val_df
+    elif dataset_name == "tangshm1k":
+        val_df = pcp_df_of_non_shmoof_nickname("tangshm", sample_count=1000)
+        return None, val_df
+    elif dataset_name == "tangshm":
+        val_df = pcp_df_of_non_shmoof_nickname("tangshm")
+        return None, val_df
     # else we are doing a shmoof dataset
     if dataset_name == "tst":
         sample_count = 1000
@@ -113,6 +113,6 @@ def train_test_dfs_of_nickname(dataset_name):
         shmoof, val_nickname = dataset_name.split("_")
         assert shmoof == "shmoof"
     train_df, val_df = load_shmoof_dataframes(
-        shmoof_path, sample_count=sample_count, val_nickname=val_nickname
+        dataset_dict["shmoof"], sample_count=sample_count, val_nickname=val_nickname
     )
     return train_df, val_df
