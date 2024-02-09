@@ -1,3 +1,3 @@
 model_names: ["rsshmoof"]
 train_data_nicknames: ["tst"]
-test_data_nicknames: ["tangshm1k", "shmoof_small"]
+test_data_nicknames: ["val_tangshm1k", "shmoof_small"]

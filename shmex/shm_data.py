@@ -9,6 +9,7 @@ dataset_dict = {
     "shmoof": "data/shmoof_pcp_2023-11-30_MASKED.csv",
     "tangshm": "data/tang-deepshm_size2_edges_22-May-2023.branch_length.csv",
     "cui": "data/cui-et-al-oof_pcp_2024-02-07_MASKED_NI.csv",
+    "greiff": "data/greiff-systems-oof_pcp_2023-11-30_MASKED.csv",
 }
 
 def localify(path):
@@ -92,16 +93,28 @@ def train_val_dfs_of_nickname(dataset_name):
     
     What's a little confusing here is that some of the datasets are only used
     for test, so this function will return None for the train_df in those cases.
+
+    When dataset_name starts with "val_", then we return the whole dataset as
+    the validation set.
     """
     if dataset_name == "cui": 
         full_df = pcp_df_of_non_shmoof_nickname("cui")
         val_df = full_df[full_df["sample_id"] == "NP+GC1_BC9_IGK_Export_2017-02-02"]
         train_df = full_df.drop(val_df.index)
         return train_df, val_df
-    elif dataset_name == "tangshm1k":
+    elif dataset_name == "greiff":
+        full_df = pcp_df_of_non_shmoof_nickname("greiff")
+        val_sample_ids = ['no-vax_m5_plasma', 'ova-vax_m1_plasma', 'hepb-vax_m2_plasma', 'np-hel-vax_m4_plasma']
+        val_df = full_df[full_df["sample_id"].isin(val_sample_ids)]
+        train_df = full_df.drop(val_df.index)
+        return train_df, val_df
+    elif dataset_name == "val_cui":
+        val_df = pcp_df_of_non_shmoof_nickname("cui")
+        return None, val_df
+    elif dataset_name == "val_tangshm1k":
         val_df = pcp_df_of_non_shmoof_nickname("tangshm", sample_count=1000)
         return None, val_df
-    elif dataset_name == "tangshm":
+    elif dataset_name == "val_tangshm":
         val_df = pcp_df_of_non_shmoof_nickname("tangshm")
         return None, val_df
     # else we are doing a shmoof dataset
