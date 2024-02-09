@@ -18,7 +18,22 @@ from netam.framework import (
 sys.path.append("..")
 from shmex.shm_data import train_val_dfs_of_nickname
 
-from shmple.evaluate import r_precision
+
+# Taken from shmple.
+def r_precision(y_true: list[np.ndarray], y_pred: list[np.ndarray]):
+
+    ret = []
+    for i, (t, p) in enumerate(zip(y_true, y_pred)):
+        num_muts = t.sum()
+        if num_muts > 0:
+            assert len(p) == len(t)
+            total_vals = len(p)
+            idxs = np.argpartition(p, kth=total_vals - num_muts)[-num_muts:]
+            ret.append(np.array(t)[idxs].sum() / num_muts)
+    if len(ret) > 0:
+        return sum(ret) / len(ret)
+    else:
+        return np.array([0.0])
 
 
 def ragged_np_pcp_encoding(parents, children):
@@ -26,9 +41,7 @@ def ragged_np_pcp_encoding(parents, children):
     base_idxs_list = []
     mask_list = []
     for parent, child in zip(parents, children):
-        mutation_indicators, base_idxs = encode_mut_pos_and_base(
-            parent, child
-        )
+        mutation_indicators, base_idxs = encode_mut_pos_and_base(parent, child)
         mutation_indicator_list.append(mutation_indicators.numpy())
         base_idxs_list.append(base_idxs.numpy())
         mask_list.append(mask_tensor_of(parent).numpy())
@@ -56,6 +69,7 @@ def mut_accuracy_stats(mutation_indicator_list, rates_list, mask_list):
         "AUROC": metrics.roc_auc_score(all_indicators, all_mutabilities),
         "AUPRC": metrics.average_precision_score(all_indicators, all_mutabilities),
         "r-prec": r_precision(mutation_indicator_list, rates_list),
+        "BCE": metrics.log_loss(all_indicators, all_mutabilities, labels=[0, 1]),
     }
 
 
