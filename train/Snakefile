@@ -6,7 +6,8 @@ import yaml
 
 from netam.framework import crepe_exists
 sys.path.append("..")
-from shmex.shm_zoo import train_model, write_test_accuracy, trained_model_str, trained_model_path
+from shmex.shm_zoo import train_model, trained_model_str, trained_model_path
+from shmex.shm_eval import write_test_accuracy
 
 configfile: "config_human.yml"
 
