@@ -86,7 +86,7 @@ def pcp_df_of_non_shmoof_nickname(dataset_name, sample_count=None):
     return pcp_df
 
 
-def train_test_dfs_of_nickname(dataset_name):
+def train_val_dfs_of_nickname(dataset_name):
     """
     Returns the train and validation dataframes for the given dataset_name.
     
