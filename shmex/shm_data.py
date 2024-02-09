@@ -9,7 +9,7 @@ dataset_dict = {
     "shmoof": "data/shmoof_pcp_2023-11-30_MASKED.csv",
     "tangshm": "data/tang-deepshm_size2_edges_22-May-2023.branch_length.csv",
     "cui": "data/cui-et-al-oof_pcp_2024-02-07_MASKED_NI.csv",
-    "greiff": "data/greiff-systems-oof_pcp_2023-11-30_MASKED.csv",
+    "greiff": "data/greiff-systems-oof_pcp_2023-11-30_MASKED_NI.csv",
 }
 
 def localify(path):
