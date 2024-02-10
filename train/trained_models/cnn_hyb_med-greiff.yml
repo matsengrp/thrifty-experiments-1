@@ -1,0 +1,16 @@
+encoder_class: KmerSequenceEncoder
+encoder_parameters:
+  kmer_length: 3
+  site_count: 500
+model_class: HybridRSCNNModel
+model_hyperparameters:
+  dropout_prob: 0.2
+  embedding_dim: 7
+  filter_count: 16
+  kernel_size: 9
+  kmer_length: 3
+serialization_version: 0
+training_hyperparameters:
+  l2_regularization_coeff: 1.0e-06
+  learning_rate: 0.1
+  min_learning_rate: 1.0e-06
