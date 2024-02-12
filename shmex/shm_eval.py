@@ -37,6 +37,11 @@ def r_precision(y_true: list[np.ndarray], y_pred: list[np.ndarray]):
 
 
 def ragged_np_pcp_encoding(parents, children):
+    """
+    Encode the mutation indicators, base indices, and masks of a list of
+    parent-child pairs in a way that can be used to calculate the accuracy of
+    the model's predictions using sklearn.metrics.
+    """
     mutation_indicator_list = []
     base_idxs_list = []
     mask_list = []
@@ -46,6 +51,25 @@ def ragged_np_pcp_encoding(parents, children):
         base_idxs_list.append(base_idxs.numpy())
         mask_list.append(mask_tensor_of(parent).numpy())
     return mutation_indicator_list, base_idxs_list, mask_list
+
+
+def restrict_to_inner(np_arr_list, site_count_to_restrict=2):
+    """
+    Cut out the first and last site_count_to_restrict sites from each array in
+    np_arr_list.
+    """
+    def restrict(arr):
+        if len(arr) < 2 * site_count_to_restrict:
+            raise ValueError(
+                f"Array length {len(arr)} is less than 2*{site_count_to_restrict}"
+            )
+        return arr[site_count_to_restrict:-site_count_to_restrict]
+
+    return [restrict(arr) for arr in np_arr_list]
+
+    
+def restrict_tuple_to_inner(tuple_of_np_lists, site_count_to_restrict=2):
+    return tuple([restrict_to_inner(l, site_count_to_restrict) for l in tuple_of_np_lists])
 
 
 def mut_accuracy_stats(mutation_indicator_list, rates_list, mask_list):
@@ -69,7 +93,9 @@ def mut_accuracy_stats(mutation_indicator_list, rates_list, mask_list):
         "AUROC": metrics.roc_auc_score(all_indicators, all_mutabilities),
         "AUPRC": metrics.average_precision_score(all_indicators, all_mutabilities),
         "r-prec": r_precision(mutation_indicator_list, rates_list),
-        "mut_pos_xent": metrics.log_loss(all_indicators, all_mutabilities, labels=[0, 1]),
+        "mut_pos_xent": metrics.log_loss(
+            all_indicators, all_mutabilities, labels=[0, 1]
+        ),
     }
 
 
@@ -80,27 +106,29 @@ def base_accuracy_stats(base_idxs_list, csp_list):
     filtered_csp_arr = np.concatenate(
         [csp[indicator != -1] for indicator, csp in zip(base_idxs_list, csp_list)]
     )
-    
+
     all_predictions = filtered_csp_arr.argmax(axis=-1)
     accuracy = (filtered_base_idxs_arr == all_predictions).mean()
-    
+
     # Prepare the true labels in the format expected by log_loss: one-hot encoded vectors
     # Since filtered_base_idxs_list contains class indices from 0 to 3, use them to create one-hot encodings
     num_classes = 4
     true_labels_one_hot = np.eye(num_classes)[filtered_base_idxs_arr.astype(int)]
     cat_cross_entropy = metrics.log_loss(true_labels_one_hot, filtered_csp_arr)
-    
+
     return {"sub_acc": accuracy, "base_xent": cat_cross_entropy}
 
 
-def write_test_accuracy(crepe_prefix, dataset_name, directory="."):
+def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_to_inner=False):
     crepe_basename = os.path.basename(crepe_prefix)
     crepe = load_crepe(crepe_prefix)
     _, pcp_df = train_val_dfs_of_nickname(dataset_name)
     rates, csps = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
-    mut_indicators, base_idxs, masks = ragged_np_pcp_encoding(
-        pcp_df["parent"], pcp_df["child"]
-    )
+    encoding_tuple = ragged_np_pcp_encoding(pcp_df["parent"], pcp_df["child"])
+    if restrict_to_inner:
+        encoding_tuple = restrict_tuple_to_inner(encoding_tuple)
+        rates, csps = restrict_tuple_to_inner((rates, csps))
+    mut_indicators, base_idxs, masks = encoding_tuple
     df_dict = {
         "crepe_prefix": crepe_prefix,
         "crepe_basename": crepe_basename,
