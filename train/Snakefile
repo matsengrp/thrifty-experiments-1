@@ -15,7 +15,7 @@ species = config["species"]
 model_names = config["model_names"]
 train_data_nicknames = config["train_data_nicknames"]
 test_data_nicknames = config["test_data_nicknames"]
-restrict_to_inner = True
+restrict_to_inner = False
 
 final_output_path = f"_ignore/{species}_model_compare.csv"
 
@@ -54,9 +54,9 @@ rule write_test_accuracy:
 rule concatenate_csvs:
     input:
         csvs = [
-            test_output_path(m, d, td) 
-                for m in model_names 
-                for d in train_data_nicknames 
+            test_output_path(m, d, td)
+                for m in model_names
+                for d in train_data_nicknames
                 for td in test_data_nicknames]
     output:
         combined_csv = final_output_path
