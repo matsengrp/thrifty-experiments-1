@@ -1,3 +1,4 @@
+import os
 import sys
 
 import torch
@@ -115,9 +116,14 @@ def trained_model_path(model_name, data_nickname):
     return f"trained_models/{trained_model_str(model_name, data_nickname)}"
 
 
-def train_model(model_name, dataset_name, resume=True):
+def train_model(model_name, dataset_name, crepe_dest_path=None, resume=True):
     train_df, val_df = train_val_dfs_of_nickname(dataset_name)
-    out_prefix = trained_model_path(model_name, dataset_name)
+    if crepe_dest_path is None:
+        crepe_dest_path = trained_model_path(model_name, dataset_name)
+    if "/" in crepe_dest_path:
+        crepe_dest_dir = crepe_dest_path[: crepe_dest_path.rfind("/")]
+        assert os.path.exists(crepe_dest_dir), f"Directory `{crepe_dest_dir}` does not exist"
+
     model = create_model(model_name)
     burrito = RSSHMBurrito(
         SHMoofDataset(train_df, kmer_length=model.kmer_length, site_count=site_count),
@@ -132,6 +138,6 @@ def train_model(model_name, dataset_name, resume=True):
     else:
         burrito.train(epochs=epochs)
 
-    burrito.save_crepe(out_prefix)
+    burrito.save_crepe(crepe_dest_path)
 
     return model
