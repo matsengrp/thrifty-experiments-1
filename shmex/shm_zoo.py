@@ -134,10 +134,12 @@ def train_model(model_name, dataset_name, crepe_dest_path=None, resume=True):
     )
 
     if dataset_name == "tst":
-        burrito.train(epochs=2)
+        burrito.full_train(epochs=2)
     else:
-        burrito.train(epochs=epochs)
+        burrito.full_train(epochs=epochs)
 
     burrito.save_crepe(crepe_dest_path)
+    burrito.train_loader.dataset.export_branch_lengths(crepe_dest_path + ".train_branch_lengths.csv")
+    burrito.val_loader.dataset.export_branch_lengths(crepe_dest_path + ".val_branch_lengths.csv")
 
     return model
