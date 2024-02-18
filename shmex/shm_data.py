@@ -10,11 +10,14 @@ dataset_dict = {
     "tangshm": "data/tang-deepshm_size2_edges_22-May-2023.branch_length.csv.gz",
     "cui": "data/cui-et-al-oof_pcp_2024-02-07_MASKED_NI.csv.gz",
     "greiff": "data/greiff-systems-oof_pcp_2023-11-30_MASKED_NI.csv.gz",
+    "syn10x": "data/wyatt-10x-1p5m_pcp_2023-11-30_NI_SYN.csv.gz",
 }
+
 
 def localify(path):
     home_dir = os.path.expanduser("~")
     return os.path.join(home_dir, path)
+
 
 dataset_dict = {name: localify(path) for name, path in dataset_dict.items()}
 
@@ -90,21 +93,30 @@ def pcp_df_of_non_shmoof_nickname(dataset_name, sample_count=None):
 def train_val_dfs_of_nickname(dataset_name):
     """
     Returns the train and validation dataframes for the given dataset_name.
-    
+
     What's a little confusing here is that some of the datasets are only used
     for test, so this function will return None for the train_df in those cases.
 
     When dataset_name starts with "val_", then we return the whole dataset as
     the validation set.
     """
-    if dataset_name == "cui": 
+    if dataset_name == "cui":
         full_df = pcp_df_of_non_shmoof_nickname("cui")
         val_df = full_df[full_df["sample_id"] == "NP+GC1_BC9_IGK_Export_2017-02-02"]
         train_df = full_df.drop(val_df.index)
         return train_df, val_df
+    # TODO
+    elif dataset_name == "cui_overtrain":
+        full_df = pcp_df_of_non_shmoof_nickname("cui")
+        return full_df, full_df.copy()
     elif dataset_name == "greiff":
         full_df = pcp_df_of_non_shmoof_nickname("greiff")
-        val_sample_ids = ['no-vax_m5_plasma', 'ova-vax_m1_plasma', 'hepb-vax_m2_plasma', 'np-hel-vax_m4_plasma']
+        val_sample_ids = [
+            "no-vax_m5_plasma",
+            "ova-vax_m1_plasma",
+            "hepb-vax_m2_plasma",
+            "np-hel-vax_m4_plasma",
+        ]
         val_df = full_df[full_df["sample_id"].isin(val_sample_ids)]
         train_df = full_df.drop(val_df.index)
         return train_df, val_df
@@ -116,6 +128,9 @@ def train_val_dfs_of_nickname(dataset_name):
         return None, val_df
     elif dataset_name == "val_tangshm":
         val_df = pcp_df_of_non_shmoof_nickname("tangshm")
+        return None, val_df
+    elif dataset_name == "val_syn10x":
+        val_df = pcp_df_of_non_shmoof_nickname("syn10x")
         return None, val_df
     # else we are doing a shmoof dataset
     if dataset_name == "tst":

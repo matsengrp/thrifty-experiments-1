@@ -134,7 +134,7 @@ def train_model(model_name, dataset_name, crepe_dest_path=None, resume=True):
     )
 
     if dataset_name == "tst":
-        burrito.full_train(epochs=2)
+        burrito.train(epochs=2)
     else:
         burrito.full_train(epochs=epochs)
 
