@@ -8,7 +8,7 @@ from netam import framework
 dataset_dict = {
     "shmoof": "data/shmoof_pcp_2023-11-30_MASKED.csv.gz",
     "tangshm": "data/tang-deepshm_size2_edges_22-May-2023.branch_length.csv.gz",
-    "cui": "data/cui-et-al-oof_pcp_2024-02-07_MASKED_NI.csv.gz",
+    "cui": "data/cui-et-al-oof_pcp_2024-02-22_MASKED_NI.csv.gz",
     "greiff": "data/greiff-systems-oof_pcp_2023-11-30_MASKED_NI.csv.gz",
     "syn10x": "data/wyatt-10x-1p5m_pcp_2023-11-30_NI_SYN.csv.gz",
 }
