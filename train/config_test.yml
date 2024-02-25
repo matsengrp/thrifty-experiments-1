@@ -1,4 +1,4 @@
 model_names: ["rsshmoof"]
 train_data_nicknames: ["tst"]
-test_data_nicknames: ["val_syn10x", "shmoof_small"]
+test_data_nicknames: ["shmoof_small"]
 training_methods: ["fixed", "full"]
