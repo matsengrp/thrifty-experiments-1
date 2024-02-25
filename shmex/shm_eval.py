@@ -93,7 +93,7 @@ def mut_accuracy_stats(mutation_indicator_list, rates_list, mask_list):
         "AUROC": metrics.roc_auc_score(all_indicators, all_mutabilities),
         "AUPRC": metrics.average_precision_score(all_indicators, all_mutabilities),
         "r-prec": r_precision(mutation_indicator_list, rates_list),
-        "mut_pos_xent": metrics.log_loss(
+        "mut_pos_ll": - metrics.log_loss(
             all_indicators, all_mutabilities, labels=[0, 1]
         ),
     }
@@ -114,9 +114,9 @@ def base_accuracy_stats(base_idxs_list, csp_list):
     # Since filtered_base_idxs_list contains class indices from 0 to 3, use them to create one-hot encodings
     num_classes = 4
     true_labels_one_hot = np.eye(num_classes)[filtered_base_idxs_arr.astype(int)]
-    cat_cross_entropy = metrics.log_loss(true_labels_one_hot, filtered_csp_arr)
+    cat_log_like = - metrics.log_loss(true_labels_one_hot, filtered_csp_arr)
 
-    return {"sub_acc": accuracy, "base_xent": cat_cross_entropy}
+    return {"sub_acc": accuracy, "base_ll": cat_log_like}
 
 
 def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_to_inner=False):
