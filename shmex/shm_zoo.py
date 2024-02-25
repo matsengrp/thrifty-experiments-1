@@ -108,18 +108,18 @@ burrito_params = {
 }
 
 
-def trained_model_str(model_name, data_nickname):
-    return f"{model_name}-{data_nickname}"
+def trained_model_str(model_name, data_nickname, training_method):
+    return f"{model_name}-{data_nickname}-{training_method}"
 
 
-def trained_model_path(model_name, data_nickname):
-    return f"trained_models/{trained_model_str(model_name, data_nickname)}"
+def trained_model_path(model_name, data_nickname, training_method):
+    return f"trained_models/{trained_model_str(model_name, data_nickname, training_method)}"
 
 
-def train_model(model_name, dataset_name, crepe_dest_path=None, resume=True):
+def train_model(model_name, dataset_name, training_method, crepe_dest_path=None):
     train_df, val_df = train_val_dfs_of_nickname(dataset_name)
     if crepe_dest_path is None:
-        crepe_dest_path = trained_model_path(model_name, dataset_name)
+        crepe_dest_path = trained_model_path(model_name, dataset_name, training_method)
     if "/" in crepe_dest_path:
         crepe_dest_dir = crepe_dest_path[: crepe_dest_path.rfind("/")]
         assert os.path.exists(crepe_dest_dir), f"Directory `{crepe_dest_dir}` does not exist"
@@ -130,13 +130,13 @@ def train_model(model_name, dataset_name, crepe_dest_path=None, resume=True):
         SHMoofDataset(val_df, kmer_length=model.kmer_length, site_count=site_count),
         model,
         **burrito_params,
-        name=trained_model_str(model_name, dataset_name),
+        name=trained_model_str(model_name, dataset_name, training_method),
     )
 
     if dataset_name == "tst":
-        burrito.train(epochs=2)
+        burrito.joint_train(epochs=2, training_method=training_method)
     else:
-        burrito.full_train(epochs=epochs)
+        burrito.joint_train(epochs=epochs, training_method=training_method)
 
     burrito.save_crepe(crepe_dest_path)
     burrito.train_loader.dataset.export_branch_lengths(crepe_dest_path + ".train_branch_lengths.csv")
