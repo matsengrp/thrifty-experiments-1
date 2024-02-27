@@ -1,6 +1,8 @@
 import os
 import sys
 
+import numpy as np
+import random
 import torch
 
 torch.set_num_threads(1)
@@ -108,18 +110,28 @@ burrito_params = {
 }
 
 
-def trained_model_str(model_name, data_nickname, training_method):
-    return f"{model_name}-{data_nickname}-{training_method}"
+def trained_model_str(model_name, data_nickname, training_method, seed):
+    return f"{model_name}-{data_nickname}-{training_method}-{seed}"
 
 
-def trained_model_path(model_name, data_nickname, training_method):
-    return f"trained_models/{trained_model_str(model_name, data_nickname, training_method)}"
+def trained_model_path(model_name, data_nickname, training_method, seed):
+    return f"trained_models/{trained_model_str(model_name, data_nickname, training_method, seed)}"
 
 
-def train_model(model_name, dataset_name, training_method, crepe_dest_path=None):
+def train_model(model_name, dataset_name, training_method, seed, crepe_dest_path=None):
+    """
+    Our goal with the seed is to ensure the different trainings are independent,
+    not to ensure reproducibility. See comments below.
+    """
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    # If we want to ensure reproducibility, we would also set the following:
+    # torch.backends.cudnn.deterministic = True
+    # torch.backends.cudnn.benchmark = False
     train_df, val_df = train_val_dfs_of_nickname(dataset_name)
     if crepe_dest_path is None:
-        crepe_dest_path = trained_model_path(model_name, dataset_name, training_method)
+        crepe_dest_path = trained_model_path(model_name, dataset_name, training_method, seed)
     if "/" in crepe_dest_path:
         crepe_dest_dir = crepe_dest_path[: crepe_dest_path.rfind("/")]
         assert os.path.exists(crepe_dest_dir), f"Directory `{crepe_dest_dir}` does not exist"
@@ -130,7 +142,7 @@ def train_model(model_name, dataset_name, training_method, crepe_dest_path=None)
         SHMoofDataset(val_df, kmer_length=model.kmer_length, site_count=site_count),
         model,
         **burrito_params,
-        name=trained_model_str(model_name, dataset_name, training_method),
+        name=trained_model_str(model_name, dataset_name, training_method, seed),
     )
 
     if dataset_name == "tst":

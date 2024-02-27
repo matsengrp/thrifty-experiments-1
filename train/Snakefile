@@ -16,18 +16,19 @@ model_names = config["model_names"]
 train_data_nicknames = config["train_data_nicknames"]
 test_data_nicknames = config["test_data_nicknames"]
 training_methods = config["training_methods"]
+seeds = range(config["replicate_count"])
 restrict_evaluation_to_shmoof_region = True
 
 final_output_path = f"_ignore/{species}_model_compare.csv"
 
 
 
-def trained_model_yml(model_name, data_nickname, training_method):
-    return f"{trained_model_path(model_name, data_nickname, training_method)}.yml"
+def trained_model_yml(model_name, data_nickname, training_method, seed):
+    return f"{trained_model_path(model_name, data_nickname, training_method, seed)}.yml"
 
 
-def test_output_path(model_name, data_nickname, training_method, dataset_name):
-    trained_model = trained_model_str(model_name, data_nickname, training_method)
+def test_output_path(model_name, data_nickname, training_method, seed, dataset_name):
+    trained_model = trained_model_str(model_name, data_nickname, training_method, seed)
     return f"_ignore/test_output/{trained_model}-ON-{dataset_name}.csv"
 
 
@@ -37,16 +38,16 @@ rule all:
 
 rule train_model:
     output:
-        trained_model=trained_model_yml("{model_name}", "{data_nickname}", "{training_method}")
+        trained_model=trained_model_yml("{model_name}", "{data_nickname}", "{training_method}", "{seed}")
     run:
-        train_model(wildcards.model_name, wildcards.data_nickname, wildcards.training_method)
+        train_model(wildcards.model_name, wildcards.data_nickname, wildcards.training_method, int(wildcards.seed))
 
 
 rule write_test_accuracy:
     input:
-        trained_model=trained_model_yml("{model_name}", "{data_nickname}", "{training_method}")
+        trained_model=trained_model_yml("{model_name}", "{data_nickname}", "{training_method}", "{seed}"),
     output:
-        test_output=test_output_path("{model_name}", "{data_nickname}", "{training_method}", "{dataset_name}")
+        test_output=test_output_path("{model_name}", "{data_nickname}", "{training_method}", "{seed}", "{dataset_name}")
     run:
         crepe_prefix = os.path.splitext(input.trained_model)[0]
         write_test_accuracy(crepe_prefix, wildcards.dataset_name, "_ignore/test_output", restrict_evaluation_to_shmoof_region)
@@ -55,10 +56,11 @@ rule write_test_accuracy:
 rule concatenate_csvs:
     input:
         csvs = [
-            test_output_path(m, d, tm, td)
+            test_output_path(m, d, tm, s, td)
                 for m in model_names
                 for d in train_data_nicknames
                 for tm in training_methods 
+                for s in seeds
                 for td in test_data_nicknames]
     output:
         combined_csv = final_output_path
