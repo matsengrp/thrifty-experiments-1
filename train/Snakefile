@@ -16,7 +16,7 @@ model_names = config["model_names"]
 train_data_nicknames = config["train_data_nicknames"]
 test_data_nicknames = config["test_data_nicknames"]
 training_methods = config["training_methods"]
-restrict_to_inner = False
+restrict_evaluation_to_shmoof_region = True
 
 final_output_path = f"_ignore/{species}_model_compare.csv"
 
@@ -49,7 +49,7 @@ rule write_test_accuracy:
         test_output=test_output_path("{model_name}", "{data_nickname}", "{training_method}", "{dataset_name}")
     run:
         crepe_prefix = os.path.splitext(input.trained_model)[0]
-        write_test_accuracy(crepe_prefix, wildcards.dataset_name, "_ignore/test_output", restrict_to_inner)
+        write_test_accuracy(crepe_prefix, wildcards.dataset_name, "_ignore/test_output", restrict_evaluation_to_shmoof_region)
 
 
 rule concatenate_csvs:

@@ -53,25 +53,18 @@ def ragged_np_pcp_encoding(parents, children):
     return mutation_indicator_list, base_idxs_list, mask_list
 
 
-def restrict_to_inner(np_arr_list, site_count_to_restrict=2):
-    """
-    Cut out the first and last site_count_to_restrict sites from each array in
-    np_arr_list.
-    """
-    def restrict(arr):
-        if len(arr) < 2 * site_count_to_restrict:
-            raise ValueError(
-                f"Array length {len(arr)} is less than 2*{site_count_to_restrict}"
-            )
-        return arr[site_count_to_restrict:-site_count_to_restrict]
-
-    return [restrict(arr) for arr in np_arr_list]
+def reset_outside_of_shmoof_region_single(indicator, reset_value):
+    indicator = indicator.copy()
+    indicator[:80] = reset_value
+    indicator[320:] = reset_value
+    return indicator
 
     
-def restrict_tuple_to_inner(tuple_of_np_lists, site_count_to_restrict=2):
-    return tuple([restrict_to_inner(l, site_count_to_restrict) for l in tuple_of_np_lists])
+def reset_outside_of_shmoof_region(indicators, reset_value):
+    return [reset_outside_of_shmoof_region_single(indicator, reset_value) for indicator in indicators]
 
 
+# TODO I guess we should take in branch lengths here.
 def mut_accuracy_stats(mutation_indicator_list, rates_list, mask_list):
     mut_freqs = [
         indic.sum() / mask.sum()
@@ -119,16 +112,16 @@ def base_accuracy_stats(base_idxs_list, csp_list):
     return {"sub_acc": accuracy, "base_ll": cat_log_like}
 
 
-def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_to_inner=False):
+def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_evaluation_to_shmoof_region=False):
     crepe_basename = os.path.basename(crepe_prefix)
     crepe = load_crepe(crepe_prefix)
     _, pcp_df = train_val_dfs_of_nickname(dataset_name)
     rates, csps = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
-    encoding_tuple = ragged_np_pcp_encoding(pcp_df["parent"], pcp_df["child"])
-    if restrict_to_inner:
-        encoding_tuple = restrict_tuple_to_inner(encoding_tuple)
-        rates, csps = restrict_tuple_to_inner((rates, csps))
-    mut_indicators, base_idxs, masks = encoding_tuple
+    mut_indicators, base_idxs, masks = ragged_np_pcp_encoding(pcp_df["parent"], pcp_df["child"])
+    if restrict_evaluation_to_shmoof_region:
+        mut_indicators = reset_outside_of_shmoof_region(mut_indicators, 0)
+        base_idxs = reset_outside_of_shmoof_region(base_idxs, -1)
+        masks = reset_outside_of_shmoof_region(masks, 0)
     df_dict = {
         "crepe_prefix": crepe_prefix,
         "crepe_basename": crepe_basename,
