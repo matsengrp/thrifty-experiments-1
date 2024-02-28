@@ -53,7 +53,7 @@ model_parameters = {
         "filter_count": 14,
         "dropout_prob": 0.1,
     },
-    "4k_k13": {
+    "4k13": {
         "kmer_length": 3,
         "kernel_size": 13,
         "embedding_dim": 12,
