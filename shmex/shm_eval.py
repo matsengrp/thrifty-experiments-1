@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn import metrics
 
 from netam.common import (
-    mask_tensor_of,
+    nt_mask_tensor_of,
     parameter_count_of_model,
 )
 from netam.framework import (
@@ -49,7 +49,7 @@ def ragged_np_pcp_encoding(parents, children):
         mutation_indicators, base_idxs = encode_mut_pos_and_base(parent, child)
         mutation_indicator_list.append(mutation_indicators.numpy())
         base_idxs_list.append(base_idxs.numpy())
-        mask_list.append(mask_tensor_of(parent).numpy())
+        mask_list.append(nt_mask_tensor_of(parent).numpy())
     return mutation_indicator_list, base_idxs_list, mask_list
 
 

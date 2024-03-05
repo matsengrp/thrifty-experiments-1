@@ -102,13 +102,6 @@ def create_model(model_name):
     return model
 
 
-burrito_params = {
-    "batch_size": 1024,
-    "learning_rate": 0.1,
-    "min_learning_rate": 1e-6,  # early stopping!
-    "l2_regularization_coeff": 1e-6,
-}
-
 
 def trained_model_str(model_name, data_nickname, training_method, seed):
     return f"{model_name}-{data_nickname}-{training_method}-{seed}"
@@ -118,11 +111,20 @@ def trained_model_path(model_name, data_nickname, training_method, seed):
     return f"trained_models/{trained_model_str(model_name, data_nickname, training_method, seed)}"
 
 
-def train_model(model_name, dataset_name, training_method, seed, crepe_dest_path=None):
+def train_model(model_name, dataset_name, training_method, seed, crepe_dest_path=None, **burrito_kwargs):
     """
     Our goal with the seed is to ensure the different trainings are independent,
     not to ensure reproducibility. See comments below.
     """
+    default_burrito_params = {
+        "batch_size": 1024,
+        "learning_rate": 0.1,
+        "min_learning_rate": 1e-6,  # early stopping!
+        "l2_regularization_coeff": 1e-6,
+    }
+    # Update default parameters with any provided keyword arguments
+    burrito_params = {**default_burrito_params, **burrito_kwargs}
+
     torch.manual_seed(seed)
     np.random.seed(seed)
     random.seed(seed)
