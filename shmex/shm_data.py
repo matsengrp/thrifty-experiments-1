@@ -9,6 +9,7 @@ dataset_dict = {
     "shmoof": "data/shmoof_pcp_2023-11-30_MASKED.csv.gz",
     "tangshm": "data/tang-deepshm_size2_edges_22-May-2023.branch_length.csv.gz",
     "cui": "data/cui-et-al-oof_pcp_2024-02-22_MASKED_NI.csv.gz",
+    "cuims": "data/cui-et-al-oof-msproc_pcp_2024-02-29_MASKED_NI.csv",
     "greiff": "data/greiff-systems-oof_pcp_2023-11-30_MASKED_NI.csv.gz",
     "syn10x": "data/wyatt-10x-1p5m_pcp_2023-11-30_NI_SYN.csv.gz",
 }
@@ -139,7 +140,7 @@ def train_val_dfs_of_nickname(dataset_name):
     else:
         sample_count = None
         shmoof, val_nickname = dataset_name.split("_")
-        assert shmoof == "shmoof"
+        assert shmoof == "shmoof", f"Dataset {dataset_name} not recognized"
     train_df, val_df = load_shmoof_dataframes(
         dataset_dict["shmoof"], sample_count=sample_count, val_nickname=val_nickname
     )
