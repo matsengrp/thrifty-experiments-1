@@ -6,7 +6,7 @@ import yaml
 
 from netam.framework import crepe_exists
 sys.path.append("..")
-from shmex.shm_zoo import train_model, trained_model_str, trained_model_path
+from shmex.shm_zoo import train_model, trained_model_str, trained_model_path, fixed_model_path
 from shmex.shm_eval import write_test_accuracy
 
 configfile: "config_human.yml"
@@ -19,17 +19,25 @@ training_methods = config["training_methods"]
 seeds = range(config["replicate_count"])
 restrict_evaluation_to_shmoof_region = True
 
+fixed_model_names = ["s5f"]
 final_output_path = f"_ignore/{species}_model_compare.csv"
-
 
 
 def trained_model_yml(model_name, data_nickname, training_method, seed):
     return f"{trained_model_path(model_name, data_nickname, training_method, seed)}.yml"
 
 
+def fixed_model_yml(model_name):
+    return f"{fixed_model_path(model_name)}.yml"
+
+
 def test_output_path(model_name, data_nickname, training_method, seed, dataset_name):
     trained_model = trained_model_str(model_name, data_nickname, training_method, seed)
     return f"_ignore/test_output/{trained_model}-ON-{dataset_name}.csv"
+
+
+def test_output_path_fixed(model_name, dataset_name):
+    return f"_ignore/test_output_fixed/{model_name}-ON-{dataset_name}.csv"
 
 
 rule all:
@@ -53,6 +61,13 @@ rule write_test_accuracy:
         write_test_accuracy(crepe_prefix, wildcards.dataset_name, "_ignore/test_output", restrict_evaluation_to_shmoof_region)
 
 
+rule write_test_accuracy_fixed:
+    output:
+        test_output=test_output_path_fixed("{model_name}", "{dataset_name}")
+    run:
+        write_test_accuracy(fixed_model_path(wildcards.model_name), wildcards.dataset_name, "_ignore/test_output_fixed", restrict_evaluation_to_shmoof_region)
+
+
 rule concatenate_csvs:
     input:
         csvs = [
@@ -61,7 +76,12 @@ rule concatenate_csvs:
                 for d in train_data_nicknames
                 for tm in training_methods 
                 for s in seeds
-                for td in test_data_nicknames]
+                for td in test_data_nicknames
+            ] + [
+            test_output_path_fixed(m, d)
+                for m in fixed_model_names
+                for d in test_data_nicknames
+            ]
     output:
         combined_csv = final_output_path
     shell:
