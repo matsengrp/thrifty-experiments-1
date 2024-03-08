@@ -111,6 +111,10 @@ def trained_model_path(model_name, data_nickname, training_method, seed):
     return f"trained_models/{trained_model_str(model_name, data_nickname, training_method, seed)}"
 
 
+def fixed_model_path(model_name):
+    return f"fixed_models/{model_name}"
+
+
 def train_model(model_name, dataset_name, training_method, seed, crepe_dest_path=None, **burrito_kwargs):
     """
     Our goal with the seed is to ensure the different trainings are independent,
