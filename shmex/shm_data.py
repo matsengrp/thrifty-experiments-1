@@ -12,6 +12,7 @@ dataset_dict = {
     "cuims": "data/cui-et-al-oof-msproc_pcp_2024-02-29_MASKED_NI.csv",
     "greiff": "data/greiff-systems-oof_pcp_2023-11-30_MASKED_NI.csv.gz",
     "syn10x": "data/wyatt-10x-1p5m_pcp_2023-11-30_NI_SYN.csv.gz",
+    "oracleshmoof10k": "data/mimic_shmoof_CNNJoiLrgShmoofSmall.10K.csv.gz"
 }
 
 
@@ -132,6 +133,9 @@ def train_val_dfs_of_nickname(dataset_name):
         return None, val_df
     elif dataset_name == "val_syn10x":
         val_df = pcp_df_of_non_shmoof_nickname("syn10x")
+        return None, val_df
+    elif dataset_name == "val_oracleshmoof10k":
+        val_df = pcp_df_of_non_shmoof_nickname("oracleshmoof10k")
         return None, val_df
     # else we are doing a shmoof dataset
     if dataset_name == "tst":
