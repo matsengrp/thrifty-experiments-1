@@ -13,7 +13,7 @@ dataset_dict = {
     "greiff": "data/greiff-systems-oof_pcp_2023-11-30_MASKED_NI.csv.gz",
     "syn10x": "data/wyatt-10x-1p5m_pcp_2023-11-30_NI_SYN.csv.gz",
     "oracleshmoofcnn10k": "data/mimic_shmoof_CNNJoiLrgShmoofSmall.10K.csv.gz",
-    "oracletangcnn10k": "data/mimic_tang_CNNJoiLrgShmoofSmall.csv.gz",
+    "oracletangcnn": "data/mimic_tang_CNNJoiLrgShmoofSmall.csv.gz",
 }
 
 
