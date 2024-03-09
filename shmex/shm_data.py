@@ -138,7 +138,10 @@ def train_val_dfs_of_nickname(dataset_name):
     elif dataset_name == "val_oracleshmoofcnn10k":
         val_df = pcp_df_of_non_shmoof_nickname("oracleshmoofcnn10k")
         return None, val_df
-    # else we are doing a shmoof dataset
+    elif dataset_name == "val_oracletangcnn":
+        val_df = pcp_df_of_non_shmoof_nickname("oracletangcnn")
+        return None, val_df
+     # else we are doing a shmoof dataset
     if dataset_name == "tst":
         sample_count = 1000
         val_nickname = "small"
