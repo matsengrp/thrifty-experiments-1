@@ -17,9 +17,9 @@ train_data_nicknames = config["train_data_nicknames"]
 test_data_nicknames = config["test_data_nicknames"]
 training_methods = config["training_methods"]
 seeds = range(config["replicate_count"])
-restrict_evaluation_to_shmoof_region = True
+restrict_evaluation_to_shmoof_region = False
 
-fixed_model_names = ["s5f"]
+fixed_model_names = ["s5f","cnn_ind_med-shmoof_small"]
 final_output_path = f"_ignore/{species}_model_compare.csv"
 
 
@@ -74,7 +74,7 @@ rule concatenate_csvs:
             test_output_path(m, d, tm, s, td)
                 for m in model_names
                 for d in train_data_nicknames
-                for tm in training_methods 
+                for tm in training_methods
                 for s in seeds
                 for td in test_data_nicknames
             ] + [
