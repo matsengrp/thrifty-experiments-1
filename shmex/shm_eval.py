@@ -36,7 +36,7 @@ def r_precision(y_true: list[np.ndarray], y_pred: list[np.ndarray]):
         return np.array([0.0])
 
 
-def ragged_np_pcp_encoding(parents, children):
+def ragged_np_pcp_encoding(parents, children, site_count=None):
     """
     Encode the mutation indicators, base indices, and masks of a list of
     parent-child pairs in a way that can be used to calculate the accuracy of
@@ -47,9 +47,9 @@ def ragged_np_pcp_encoding(parents, children):
     mask_list = []
     for parent, child in zip(parents, children):
         mutation_indicators, base_idxs = encode_mut_pos_and_base(parent, child)
-        mutation_indicator_list.append(mutation_indicators.numpy())
-        base_idxs_list.append(base_idxs.numpy())
-        mask_list.append(nt_mask_tensor_of(parent).numpy())
+        mutation_indicator_list.append(mutation_indicators.numpy()[:site_count])
+        base_idxs_list.append(base_idxs.numpy()[:site_count])
+        mask_list.append(nt_mask_tensor_of(parent).numpy()[:site_count])
     return mutation_indicator_list, base_idxs_list, mask_list
 
 
@@ -113,7 +113,8 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_eval
     crepe = load_crepe(crepe_prefix)
     _, pcp_df = train_val_dfs_of_nickname(dataset_name)
     rates, csps = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
-    mut_indicators, base_idxs, masks = ragged_np_pcp_encoding(pcp_df["parent"], pcp_df["child"])
+    site_count = crepe.encoder.site_count
+    mut_indicators, base_idxs, masks = ragged_np_pcp_encoding(pcp_df["parent"], pcp_df["child"], site_count)
     standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
     val_bls = pcp_df["branch_length"].values
     if restrict_evaluation_to_shmoof_region:
