@@ -102,7 +102,6 @@ def create_model(model_name):
     return model
 
 
-
 def trained_model_str(model_name, data_nickname, training_method, seed):
     return f"{model_name}-{data_nickname}-{training_method}-{seed}"
 
@@ -115,14 +114,21 @@ def fixed_model_path(model_name):
     return f"fixed_models/{model_name}"
 
 
-def train_model(model_name, dataset_name, training_method, seed, crepe_dest_path=None, **burrito_kwargs):
+def train_model(
+    model_name,
+    dataset_name,
+    training_method,
+    seed,
+    crepe_dest_path=None,
+    **burrito_kwargs,
+):
     """
     Our goal with the seed is to ensure the different trainings are independent,
     not to ensure reproducibility. See comments below.
     """
     default_burrito_params = {
         "batch_size": 1024,
-        "learning_rate": 0.1,
+        "learning_rate": 0.001,
         "min_learning_rate": 1e-6,  # early stopping!
         "l2_regularization_coeff": 1e-6,
     }
@@ -137,10 +143,14 @@ def train_model(model_name, dataset_name, training_method, seed, crepe_dest_path
     # torch.backends.cudnn.benchmark = False
     train_df, val_df = train_val_dfs_of_nickname(dataset_name)
     if crepe_dest_path is None:
-        crepe_dest_path = trained_model_path(model_name, dataset_name, training_method, seed)
+        crepe_dest_path = trained_model_path(
+            model_name, dataset_name, training_method, seed
+        )
     if "/" in crepe_dest_path:
         crepe_dest_dir = crepe_dest_path[: crepe_dest_path.rfind("/")]
-        assert os.path.exists(crepe_dest_dir), f"Directory `{crepe_dest_dir}` does not exist"
+        assert os.path.exists(
+            crepe_dest_dir
+        ), f"Directory `{crepe_dest_dir}` does not exist"
 
     model = create_model(model_name)
     burrito = RSSHMBurrito(
@@ -154,11 +164,17 @@ def train_model(model_name, dataset_name, training_method, seed, crepe_dest_path
     if dataset_name == "tst":
         burrito.joint_train(epochs=2, training_method=training_method)
     else:
-        burrito.joint_train(epochs=epochs, training_method=training_method)
+        burrito.joint_train(
+            epochs=epochs, training_method=training_method, cycle_count=5
+        )
 
     burrito.save_crepe(crepe_dest_path)
-    burrito.train_loader.dataset.export_branch_lengths(crepe_dest_path + ".train_branch_lengths.csv")
-    burrito.val_loader.dataset.export_branch_lengths(crepe_dest_path + ".val_branch_lengths.csv")
+    burrito.train_loader.dataset.export_branch_lengths(
+        crepe_dest_path + ".train_branch_lengths.csv"
+    )
+    burrito.val_loader.dataset.export_branch_lengths(
+        crepe_dest_path + ".val_branch_lengths.csv"
+    )
 
     return model
 
