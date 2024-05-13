@@ -4,6 +4,10 @@ import sys
 import numpy as np
 import pandas as pd
 from sklearn import metrics
+import torch
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 from netam.common import (
     nt_mask_tensor_of,
@@ -14,6 +18,7 @@ from netam.framework import (
     load_crepe,
     trimmed_shm_model_outputs_of_crepe,
 )
+from epam import evaluation
 
 sys.path.append("..")
 from shmex.shm_data import train_val_dfs_of_nickname
@@ -108,18 +113,42 @@ def base_accuracy_stats(base_idxs_list, csp_list):
     return {"sub_acc": accuracy, "base_ll": cat_log_like}
 
 
+def oe_plot_of(ratess, masks, branch_lengths, mut_indicators, suptitle_prefix=""):
+    mut_probs_l = []
+    mut_indicators_l = []
+
+    for rates, mask, branch_length, mut_indicator in zip(ratess, masks, branch_lengths, mut_indicators):
+        mut_probs = 1.0 - torch.exp(-rates * branch_length)
+        mut_probs_l.append(mut_probs[mask])
+        mut_indicators_l.append(mut_indicator[mask])
+
+    oe_plot_df = pd.DataFrame({
+        "prob": torch.cat(mut_probs_l).numpy(),
+        "mutation": np.concatenate(mut_indicators_l),
+    })
+
+    fig, axs = plt.subplots(2, 1, figsize=(12, 10))
+    result_dict = evaluation.plot_observed_vs_expected(oe_plot_df, None, axs[0], axs[1])
+    if suptitle_prefix != "":
+        suptitle_prefix = suptitle_prefix + "; "
+    fig.suptitle(f"{suptitle_prefix}overlap={result_dict['overlap']:.3g}, residual={result_dict['residual']:.3g}", fontsize=16)
+    plt.tight_layout()
+
+    return fig, result_dict
+
+
 def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_evaluation_to_shmoof_region=False):
     crepe_basename = os.path.basename(crepe_prefix)
     crepe = load_crepe(crepe_prefix)
     _, pcp_df = train_val_dfs_of_nickname(dataset_name)
-    rates, csps = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
+    ratess, cspss = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
     site_count = crepe.encoder.site_count
-    mut_indicators, base_idxs, masks = ragged_np_pcp_encoding(pcp_df["parent"], pcp_df["child"], site_count)
+    mut_indicators, base_idxss, masks = ragged_np_pcp_encoding(pcp_df["parent"], pcp_df["child"], site_count)
     standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
     val_bls = pcp_df["branch_length"].values
     if restrict_evaluation_to_shmoof_region:
         mut_indicators = reset_outside_of_shmoof_region(mut_indicators, 0)
-        base_idxs = reset_outside_of_shmoof_region(base_idxs, -1)
+        base_idxss = reset_outside_of_shmoof_region(base_idxss, -1)
         masks = reset_outside_of_shmoof_region(masks, 0)
     df_dict = {
         "crepe_prefix": crepe_prefix,
@@ -127,10 +156,15 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_eval
         "parameter_count": parameter_count_of_model(crepe.model),
         "dataset_name": dataset_name,
     }
-    df_dict.update(mut_accuracy_stats(mut_indicators, rates, val_bls, masks))
-    df_dict.update(base_accuracy_stats(base_idxs, csps))
+    df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
+    df_dict.update(base_accuracy_stats(base_idxss, cspss))
+    comparison_title = f"{crepe_basename}-ON-{dataset_name}"
+    fig, oe_results = oe_plot_of(ratess, masks, val_bls, mut_indicators, comparison_title)
+    oe_results.pop("counts_twinx_ax")
+    df_dict.update(oe_results)
     df = pd.DataFrame(df_dict, index=[0])
     df.to_csv(
-        f"{directory}/{crepe_basename}-ON-{dataset_name}.csv",
+        f"{directory}/{comparison_title}.csv",
         index=False,
     )
+    fig.savefig(f"{directory}/{comparison_title}.png")
