@@ -1,6 +1,8 @@
 species: "human"
-model_names: ["fivemer", "rsshmoof", "cnn_joi_sml", "cnn_joi_med", "cnn_joi_lrg", "cnn_hyb_sml", "cnn_hyb_med", "cnn_hyb_lrg", "cnn_ind_sml", "cnn_ind_med", "cnn_ind_lrg"]
+# model_names: ["fivemer", "rsshmoof", "cnn_joi_sml", "cnn_joi_med", "cnn_joi_lrg", "cnn_hyb_sml", "cnn_hyb_med", "cnn_hyb_lrg", "cnn_ind_sml", "cnn_ind_med", "cnn_ind_lrg"]
+model_names: ["fivemer", "rsshmoof", "cnn_joi_lrg", "cnn_ind_med"]
 train_data_nicknames: ["shmoof_small"]
-test_data_nicknames: ["shmoof_small", "val_tangshm", "val_oracleshmoofcnn10k", "val_oracletangcnn"]
-training_methods: ["fixed"]
-replicate_count: 5
+test_data_nicknames: ["shmoof_small", "val_tangshm"]
+# test_data_nicknames: ["shmoof_small", "val_tangshm", "val_oracleshmoofcnn10k", "val_oracletangcnn"]
+training_methods: ["fixed", "yun", "full"]
+replicate_count: 3
