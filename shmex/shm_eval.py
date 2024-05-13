@@ -17,7 +17,7 @@ from netam.framework import (
 
 sys.path.append("..")
 from shmex.shm_data import train_val_dfs_of_nickname
-
+from shmex.shm_zoo import standardize_and_optimize_branch_lengths
 
 # Taken from shmple.
 def r_precision(y_true: list[np.ndarray], y_pred: list[np.ndarray]):
@@ -64,16 +64,12 @@ def reset_outside_of_shmoof_region(indicators, reset_value):
     return [reset_outside_of_shmoof_region_single(indicator, reset_value) for indicator in indicators]
 
 
-# TODO I guess we should take in branch lengths here.
-def mut_accuracy_stats(mutation_indicator_list, rates_list, mask_list):
-    mut_freqs = [
-        indic.sum() / mask.sum()
-        for indic, mask in zip(mutation_indicator_list, mask_list)
-    ]
+def mut_accuracy_stats(mutation_indicator_list, rates_list, bl_array, mask_list):
+    assert len(mutation_indicator_list) == len(rates_list) == len(bl_array) == len(mask_list)
     rates_list = [
-        rates[: len(indicator)] * mut_freq
-        for indicator, rates, mut_freq in zip(
-            mutation_indicator_list, rates_list, mut_freqs
+        rates[: len(indicator)] * bl
+        for indicator, rates, bl in zip(
+            mutation_indicator_list, rates_list, bl_array
         )
     ]
     rates_list = [rates[mask] for rates, mask in zip(rates_list, mask_list)]
@@ -118,6 +114,8 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_eval
     _, pcp_df = train_val_dfs_of_nickname(dataset_name)
     rates, csps = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
     mut_indicators, base_idxs, masks = ragged_np_pcp_encoding(pcp_df["parent"], pcp_df["child"])
+    standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
+    val_bls = pcp_df["branch_length"].values
     if restrict_evaluation_to_shmoof_region:
         mut_indicators = reset_outside_of_shmoof_region(mut_indicators, 0)
         base_idxs = reset_outside_of_shmoof_region(base_idxs, -1)
@@ -128,7 +126,7 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_eval
         "parameter_count": parameter_count_of_model(crepe.model),
         "dataset_name": dataset_name,
     }
-    df_dict.update(mut_accuracy_stats(mut_indicators, rates, masks))
+    df_dict.update(mut_accuracy_stats(mut_indicators, rates, val_bls, masks))
     df_dict.update(base_accuracy_stats(base_idxs, csps))
     df = pd.DataFrame(df_dict, index=[0])
     df.to_csv(

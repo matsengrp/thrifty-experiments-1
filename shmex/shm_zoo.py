@@ -161,3 +161,21 @@ def train_model(model_name, dataset_name, training_method, seed, crepe_dest_path
     burrito.val_loader.dataset.export_branch_lengths(crepe_dest_path + ".val_branch_lengths.csv")
 
     return model
+
+
+def standardize_and_optimize_branch_lengths(model, pcp_df):
+    """
+    Given a model and a DataFrame of parent-child pairs, standardize the rates
+    in the model and then optimize the branch lengths, updating the column in
+    the pcp_df.
+    """
+    burrito = RSSHMBurrito(
+            None,
+            SHMoofDataset(pcp_df, kmer_length=model.kmer_length, site_count=site_count),
+            model,
+        )
+    burrito.standardize_and_optimize_branch_lengths()
+
+    pcp_df["orig_branch_length"] = pcp_df["branch_length"]
+    pcp_df["branch_length"] = burrito.val_loader.dataset.branch_lengths
+    return pcp_df
