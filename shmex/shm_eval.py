@@ -167,4 +167,4 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_eval
         f"{directory}/{comparison_title}.csv",
         index=False,
     )
-    fig.savefig(f"{directory}/{comparison_title}.png")
+    fig.savefig(f"{directory}/{comparison_title}.pdf")
