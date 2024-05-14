@@ -184,13 +184,16 @@ def standardize_and_optimize_branch_lengths(model, pcp_df):
     Given a model and a DataFrame of parent-child pairs, standardize the rates
     in the model and then optimize the branch lengths, updating the column in
     the pcp_df.
+
+    This is used for model evaluation, so we make the optimization tolerance
+    smaller.
     """
     burrito = RSSHMBurrito(
             None,
             SHMoofDataset(pcp_df, kmer_length=model.kmer_length, site_count=site_count),
             model,
         )
-    burrito.standardize_and_optimize_branch_lengths()
+    burrito.standardize_and_optimize_branch_lengths(optimization_tol=1e-4)
 
     pcp_df["orig_branch_length"] = pcp_df["branch_length"]
     pcp_df["branch_length"] = burrito.val_loader.dataset.branch_lengths
