@@ -141,10 +141,10 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_eval
     crepe_basename = os.path.basename(crepe_prefix)
     crepe = load_crepe(crepe_prefix)
     _, pcp_df = train_val_dfs_of_nickname(dataset_name)
+    standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
     ratess, cspss = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
     site_count = crepe.encoder.site_count
     mut_indicators, base_idxss, masks = ragged_np_pcp_encoding(pcp_df["parent"], pcp_df["child"], site_count)
-    standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
     val_bls = pcp_df["branch_length"].values
     if restrict_evaluation_to_shmoof_region:
         mut_indicators = reset_outside_of_shmoof_region(mut_indicators, 0)
@@ -159,12 +159,19 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_eval
     df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
     df_dict.update(base_accuracy_stats(base_idxss, cspss))
     comparison_title = f"{crepe_basename}-ON-{dataset_name}"
-    fig, oe_results = oe_plot_of(ratess, masks, val_bls, mut_indicators, comparison_title)
+    fig, oe_results = oe_plot_of(ratess, masks, val_bls, mut_indicators, comparison_title+"-nostd")
+    fig.savefig(f"{directory}/{comparison_title}-nostd.pdf")
     oe_results.pop("counts_twinx_ax")
     df_dict.update(oe_results)
+    # begin temporary
+    fig, oe_results_nobl = oe_plot_of(ratess, masks, pcp_df["orig_branch_length"], mut_indicators, comparison_title+"-nostd-nobl")
+    oe_results_nobl.pop("counts_twinx_ax")
+    df_dict.update({k+"_nobl": v for k, v in oe_results_nobl.items()})
+    fig.savefig(f"{directory}/{comparison_title}-nostd-nobl.pdf")
+    # end temporary
     df = pd.DataFrame(df_dict, index=[0])
     df.to_csv(
         f"{directory}/{comparison_title}.csv",
         index=False,
     )
-    fig.savefig(f"{directory}/{comparison_title}.pdf")
+    
