@@ -159,16 +159,10 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_eval
     df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
     df_dict.update(base_accuracy_stats(base_idxss, cspss))
     comparison_title = f"{crepe_basename}-ON-{dataset_name}"
-    fig, oe_results = oe_plot_of(ratess, masks, val_bls, mut_indicators, comparison_title+"-nostd")
-    fig.savefig(f"{directory}/{comparison_title}-nostd.pdf")
+    fig, oe_results = oe_plot_of(ratess, masks, val_bls, mut_indicators, comparison_title)
+    fig.savefig(f"{directory}/{comparison_title}.pdf")
     oe_results.pop("counts_twinx_ax")
     df_dict.update(oe_results)
-    # begin temporary
-    fig, oe_results_nobl = oe_plot_of(ratess, masks, pcp_df["orig_branch_length"], mut_indicators, comparison_title+"-nostd-nobl")
-    oe_results_nobl.pop("counts_twinx_ax")
-    df_dict.update({k+"_nobl": v for k, v in oe_results_nobl.items()})
-    fig.savefig(f"{directory}/{comparison_title}-nostd-nobl.pdf")
-    # end temporary
     df = pd.DataFrame(df_dict, index=[0])
     df.to_csv(
         f"{directory}/{comparison_title}.csv",
