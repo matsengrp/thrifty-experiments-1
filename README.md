@@ -2,6 +2,12 @@
 
 Experiments with [netam](https://github.com/matsengrp/netam)
 
+To install
+
+   pip install -e .
+
+In an environment into which you have installed `epam` and `netam`.
+
 
 ## TODOs
 
