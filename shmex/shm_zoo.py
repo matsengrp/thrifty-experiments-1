@@ -193,7 +193,7 @@ def standardize_and_optimize_branch_lengths(model, pcp_df):
             SHMoofDataset(pcp_df, kmer_length=model.kmer_length, site_count=site_count),
             model,
         )
-    burrito.standardize_and_optimize_branch_lengths(optimization_tol=1e-4)
+    burrito.standardize_and_optimize_branch_lengths(optimization_tol=1e-5)
 
     pcp_df["orig_branch_length"] = pcp_df["branch_length"]
     pcp_df["branch_length"] = burrito.val_loader.dataset.branch_lengths
