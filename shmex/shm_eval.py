@@ -19,6 +19,8 @@ from netam.framework import (
     encode_mut_pos_and_base,
     load_crepe,
     trimmed_shm_model_outputs_of_crepe,
+    RSSHMBurrito,
+    SHMoofDataset,
 )
 from epam import evaluation
 
@@ -129,8 +131,8 @@ def oe_plot_of(ratess, masks, branch_lengths, mut_indicators, suptitle_prefix=""
         "mutation": np.concatenate(mut_indicators_l),
     })
 
-    fig, axs = plt.subplots(2, 1, figsize=(12, 10))
-    result_dict = evaluation.plot_observed_vs_expected(oe_plot_df, None, axs[0], axs[1])
+    fig, axs = plt.subplots(1, 1, figsize=(12, 5))
+    result_dict = evaluation.plot_observed_vs_expected(oe_plot_df, None, axs, None)
     if suptitle_prefix != "":
         suptitle_prefix = suptitle_prefix + "; "
     fig.suptitle(f"{suptitle_prefix}overlap={result_dict['overlap']:.3g}, residual={result_dict['residual']:.3g}", fontsize=16)
@@ -181,3 +183,20 @@ def show_figure(fig):
     buf.seek(0)
     display(Image(data=buf.read()))
     buf.close()
+
+    
+def optimized_branch_lengths_of_crepe(crepe, pcp_df):
+    """
+    Modify the branch lengths in the pcp_df DataFrame to be the optimized
+    ones for the given crepe.
+    """
+    site_count = crepe.encoder.site_count
+    model = crepe.model
+    burrito = RSSHMBurrito(
+            None,
+            SHMoofDataset(pcp_df, kmer_length=model.kmer_length, site_count=site_count),
+            model,
+        )
+    burrito.standardize_and_optimize_branch_lengths()
+
+    return burrito.val_loader.dataset.branch_lengths
