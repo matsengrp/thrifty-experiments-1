@@ -6,15 +6,15 @@ from netam import framework
 
 
 dataset_dict = {
-    "shmoof": "data/shmoof_pcp_2023-11-30_MASKED.csv.gz",
+    "shmoof": "data/v0/shmoof_pcp_2023-11-30_MASKED.csv.gz",
     #"tangshm": "data/tang-deepshm_size2_edges_22-May-2023.branch_length.csv.gz",
-    "tangshm": "data/v1-format/tang-deepshm-oof_pcp_2024-04-09_MASKED_NI.csv.gz",
-    "cui": "data/cui-et-al-oof_pcp_2024-02-22_MASKED_NI.csv.gz",
-    "cuims": "data/cui-et-al-oof-msproc_pcp_2024-02-29_MASKED_NI.csv",
-    "greiff": "data/greiff-systems-oof_pcp_2023-11-30_MASKED_NI.csv.gz",
-    "syn10x": "data/wyatt-10x-1p5m_pcp_2023-11-30_NI_SYN.csv.gz",
-    "oracleshmoofcnn10k": "data/mimic_shmoof_CNNJoiLrgShmoofSmall.10K.csv.gz",
-    "oracletangcnn": "data/mimic_tang_CNNJoiLrgShmoofSmall.csv.gz",
+    "tangshm": "data/v1/tang-deepshm-oof_pcp_2024-04-09_MASKED_NI.csv.gz",
+    "cui": "data/v0/cui-et-al-oof_pcp_2024-02-22_MASKED_NI.csv.gz",
+    "cuims": "data/v0/cui-et-al-oof-msproc_pcp_2024-02-29_MASKED_NI.csv",
+    "greiff": "data/v0/greiff-systems-oof_pcp_2023-11-30_MASKED_NI.csv.gz",
+    "syn10x": "data/v0/wyatt-10x-1p5m_pcp_2023-11-30_NI_SYN.csv.gz",
+    "oracleshmoofcnn10k": "data/v0/mimic_shmoof_CNNJoiLrgShmoofSmall.10K.csv.gz",
+    "oracletangcnn": "data/v0/mimic_tang_CNNJoiLrgShmoofSmall.csv.gz",
 }
 
 

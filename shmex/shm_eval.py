@@ -1,5 +1,7 @@
 import os
 import sys
+import io
+from IPython.display import Image, display
 
 import numpy as np
 import pandas as pd
@@ -169,3 +171,13 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_eval
         index=False,
     )
     
+def show_figure(fig):
+    """
+    This function is necessary to show a figure in a Jupyter notebook when we
+    are using the Agg backend.
+    """
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png')
+    buf.seek(0)
+    display(Image(data=buf.read()))
+    buf.close()
