@@ -117,7 +117,7 @@ def base_accuracy_stats(base_idxs_list, csp_list):
     return {"sub_acc": accuracy, "base_ll": cat_log_like}
 
 
-def oe_plot_of(ratess, masks, branch_lengths, mut_indicators, suptitle_prefix=""):
+def oe_plot_of(ratess, masks, branch_lengths, mut_indicators, suptitle_prefix="", binning=None):
     mut_probs_l = []
     mut_indicators_l = []
 
@@ -132,7 +132,7 @@ def oe_plot_of(ratess, masks, branch_lengths, mut_indicators, suptitle_prefix=""
     })
 
     fig, axs = plt.subplots(1, 1, figsize=(12, 5))
-    result_dict = evaluation.plot_observed_vs_expected(oe_plot_df, None, axs, None)
+    result_dict = evaluation.plot_observed_vs_expected(oe_plot_df, None, axs, None, binning=binning)
     if suptitle_prefix != "":
         suptitle_prefix = suptitle_prefix + "; "
     fig.suptitle(f"{suptitle_prefix}overlap={result_dict['overlap']:.3g}, residual={result_dict['residual']:.3g}", fontsize=16)
