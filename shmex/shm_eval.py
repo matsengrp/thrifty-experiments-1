@@ -117,9 +117,12 @@ def base_accuracy_stats(base_idxs_list, csp_list):
     return {"sub_acc": accuracy, "base_ll": cat_log_like}
 
 
-def oe_plot_of(ratess, masks, branch_lengths, mut_indicators, suptitle_prefix="", binning=None):
+def oe_plot_of(ratess, masks, branch_lengths, mut_indicators, suptitle_prefix="", binning=None, restrict_to_shmoof_region=False):
     mut_probs_l = []
     mut_indicators_l = []
+
+    if restrict_to_shmoof_region:
+        masks = reset_outside_of_shmoof_region(masks, 0)
 
     for rates, mask, branch_length, mut_indicator in zip(ratess, masks, branch_lengths, mut_indicators):
         mut_probs = 1.0 - torch.exp(-rates * branch_length)
