@@ -157,3 +157,5 @@ _ignore/
 .DS_Store
 _logs/
 netam
+.snakemake
+train/trained_models/*tst*
