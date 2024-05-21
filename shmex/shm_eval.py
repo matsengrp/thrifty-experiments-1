@@ -57,7 +57,7 @@ def ragged_np_pcp_encoding(parents, children, site_count=None):
         mutation_indicators, base_idxs = encode_mut_pos_and_base(parent, child)
         mutation_indicator_list.append(mutation_indicators.numpy()[:site_count])
         base_idxs_list.append(base_idxs.numpy()[:site_count])
-        mask_list.append(nt_mask_tensor_of(parent).numpy()[:site_count])
+        mask_list.append(nt_mask_tensor_of(child).numpy()[:site_count])
     return mutation_indicator_list, base_idxs_list, mask_list
 
 
@@ -116,7 +116,12 @@ def base_accuracy_stats(base_idxs_list, csp_list):
     return {"sub_acc": accuracy, "base_ll": cat_log_like}
 
 
-def oe_plot_of(ratess, masks, branch_lengths, mut_indicators, suptitle_prefix="", binning=None, restrict_to_shmoof_region=False):
+def oe_plot_of(ratess, masks, branch_lengths, mut_indicators, suptitle_prefix="", binning=None, restrict_to_shmoof_region=False, **oe_kwargs):
+    """
+    Glue code to create an observed vs. expected plot from the given model outputs.
+    
+    Note that `oe_kwargs` are directly passed to `evaluation.plot_observed_vs_expected`.
+    """
     mut_probs_l = []
     mut_indicators_l = []
 
@@ -134,7 +139,7 @@ def oe_plot_of(ratess, masks, branch_lengths, mut_indicators, suptitle_prefix=""
     })
 
     fig, axs = plt.subplots(1, 1, figsize=(12, 5))
-    result_dict = evaluation.plot_observed_vs_expected(oe_plot_df, None, axs, None, binning=binning)
+    result_dict = evaluation.plot_observed_vs_expected(oe_plot_df, None, axs, None, binning=binning, **oe_kwargs)
     if suptitle_prefix != "":
         suptitle_prefix = suptitle_prefix + "; "
     fig.suptitle(f"{suptitle_prefix}overlap={result_dict['overlap']:.3g}, residual={result_dict['residual']:.3g}", fontsize=16)
