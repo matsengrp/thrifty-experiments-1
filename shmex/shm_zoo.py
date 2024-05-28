@@ -15,7 +15,7 @@ from netam.framework import (
 from netam import models
 
 sys.path.append("..")
-from shmex.shm_data import train_val_dfs_of_nickname
+from shmex.shm_data import train_val_dfs_of_nicknames
 
 # Very helpful for debugging!
 # torch.autograd.set_detect_anomaly(True)
@@ -141,7 +141,7 @@ def train_model(
     # If we want to ensure reproducibility, we would also set the following:
     # torch.backends.cudnn.deterministic = True
     # torch.backends.cudnn.benchmark = False
-    train_df, val_df = train_val_dfs_of_nickname(dataset_name)
+    train_df, val_df = train_val_dfs_of_nicknames(dataset_name)
     if crepe_dest_path is None:
         crepe_dest_path = trained_model_path(
             model_name, dataset_name, training_method, seed
@@ -161,7 +161,7 @@ def train_model(
         name=trained_model_str(model_name, dataset_name, training_method, seed),
     )
 
-    if dataset_name == "tst":
+    if dataset_name.startswith("tst"):
         burrito.joint_train(epochs=2, training_method=training_method)
     else:
         burrito.joint_train(

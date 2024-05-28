@@ -1,4 +1,5 @@
 import os
+import re
 
 import pandas as pd
 
@@ -100,6 +101,20 @@ def pcp_df_of_non_shmoof_nickname(dataset_name, sample_count=None):
     return pcp_df
 
 
+def pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(dataset_name):
+    """
+    If dataset_name ends with "Yk" where Y is a number, then we take that number
+    and call pcp_df_of_non_shmoof_nickname with that number of samples.
+    """
+    if dataset_name[-1] == "k":
+        regex = r"(.*[^\d])(\d+)k"
+        dataset_name, sample_count = re.match(regex, dataset_name).groups()
+        sample_count = int(sample_count) * 1000
+    else:
+        sample_count = None
+    return pcp_df_of_non_shmoof_nickname(dataset_name, sample_count)
+
+
 def train_val_split_from_val_sample_ids(full_df, val_sample_ids):
     """
     Splits the full_df into train and validation dataframes based on the val_sample_ids.
@@ -146,8 +161,8 @@ def train_val_dfs_of_nickname(dataset_name):
     elif dataset_name == "val_tangshm":
         val_df = pcp_df_of_non_shmoof_nickname("tangshm")
         return None, val_df
-    elif dataset_name == "syn10x":
-        full_df = pcp_df_of_non_shmoof_nickname("syn10x")
+    elif dataset_name.startswith("syn10x"):
+        full_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(dataset_name)
         val_sample_ids = ["d4"] # this one has about 25% of the data
         return train_val_split_from_val_sample_ids(full_df, val_sample_ids)
     elif dataset_name == "val_oracleshmoofcnn10k":
@@ -168,3 +183,20 @@ def train_val_dfs_of_nickname(dataset_name):
         dataset_dict["shmoof"], sample_count=sample_count, val_nickname=val_nickname
     )
     return train_df, val_df
+
+
+def train_val_dfs_of_nicknames(dataset_names):
+    """
+    Splits dataset_names by "+", runs train_val_dfs_of_nickname on each one,
+    and combines each pair of train and validation dataframes into a single
+    pair of train and validation dataframes.
+    """
+    dataset_names = dataset_names.split("+")
+    train_dfs = []
+    val_dfs = []
+    for dataset_name in dataset_names:
+        train_df, val_df = train_val_dfs_of_nickname(dataset_name)
+        if train_df is not None:
+            train_dfs.append(train_df)
+        val_dfs.append(val_df)
+    return tuple([pd.concat(dfs).reset_index(drop=True) for dfs in [train_dfs, val_dfs]])

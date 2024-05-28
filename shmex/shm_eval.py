@@ -24,7 +24,7 @@ from netam.framework import (
 from epam import evaluation
 
 sys.path.append("..")
-from shmex.shm_data import train_val_dfs_of_nickname
+from shmex.shm_data import train_val_dfs_of_nicknames
 from shmex.shm_zoo import standardize_and_optimize_branch_lengths
 
 # Taken from shmple.
@@ -152,7 +152,7 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_eval
     matplotlib.use('Agg')
     crepe_basename = os.path.basename(crepe_prefix)
     crepe = load_crepe(crepe_prefix)
-    _, pcp_df = train_val_dfs_of_nickname(dataset_name)
+    _, pcp_df = train_val_dfs_of_nicknames(dataset_name)
     standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
     ratess, cspss = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
     site_count = crepe.encoder.site_count
