@@ -25,6 +25,13 @@ def localify(path):
 dataset_dict = {name: localify(path) for name, path in dataset_dict.items()}
 
 
+def parent_and_child_differ(row):
+    for p, c in zip(row["parent"], row["child"]):
+        if c != "N" and p != c and p != "N":
+            return True
+    return False
+
+
 def load_shmoof_dataframes(
     csv_path, sample_count=None, val_nickname="13", random_seed=42
 ):
@@ -85,7 +92,7 @@ def pcp_df_of_non_shmoof_nickname(dataset_name, sample_count=None):
     print(f"Loading {dataset_dict[dataset_name]}")
 
     pcp_df = pd.read_csv(dataset_dict[dataset_name], index_col=0)
-    pcp_df = pcp_df[pcp_df["parent"] != pcp_df["child"]]
+    pcp_df = pcp_df[pcp_df.apply(parent_and_child_differ, axis=1)]
     if sample_count is not None:
         pcp_df = pcp_df.sample(sample_count)
     pcp_df = pcp_df.reset_index(drop=True)
