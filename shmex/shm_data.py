@@ -11,7 +11,7 @@ dataset_dict = {
     "cui": "data/v0/cui-et-al-oof_pcp_2024-02-22_MASKED_NI.csv.gz",
     "cuims": "data/v0/cui-et-al-oof-msproc_pcp_2024-02-29_MASKED_NI.csv",
     "greiff": "data/v0/greiff-systems-oof_pcp_2023-11-30_MASKED_NI.csv.gz",
-    "syn10x": "data/v0/wyatt-10x-1p5m_pcp_2023-11-30_NI_SYN.csv.gz",
+    "syn10x": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_SYN.csv.gz",
     "oracleshmoofcnn10k": "data/v0/mimic_shmoof_CNNJoiLrgShmoofSmall.10K.csv.gz",
     "oracletangcnn": "data/v0/mimic_tang_CNNJoiLrgShmoofSmall.csv.gz",
 }
@@ -93,6 +93,15 @@ def pcp_df_of_non_shmoof_nickname(dataset_name, sample_count=None):
     return pcp_df
 
 
+def train_val_split_from_val_sample_ids(full_df, val_sample_ids):
+    """
+    Splits the full_df into train and validation dataframes based on the val_sample_ids.
+    """
+    val_df = full_df[full_df["sample_id"].isin(val_sample_ids)]
+    train_df = full_df.drop(val_df.index)
+    return train_df, val_df
+
+
 def train_val_dfs_of_nickname(dataset_name):
     """
     Returns the train and validation dataframes for the given dataset_name.
@@ -120,9 +129,7 @@ def train_val_dfs_of_nickname(dataset_name):
             "hepb-vax_m2_plasma",
             "np-hel-vax_m4_plasma",
         ]
-        val_df = full_df[full_df["sample_id"].isin(val_sample_ids)]
-        train_df = full_df.drop(val_df.index)
-        return train_df, val_df
+        return train_val_split_from_val_sample_ids(full_df, val_sample_ids)
     elif dataset_name == "val_cui":
         val_df = pcp_df_of_non_shmoof_nickname("cui")
         return None, val_df
@@ -132,9 +139,10 @@ def train_val_dfs_of_nickname(dataset_name):
     elif dataset_name == "val_tangshm":
         val_df = pcp_df_of_non_shmoof_nickname("tangshm")
         return None, val_df
-    elif dataset_name == "val_syn10x":
-        val_df = pcp_df_of_non_shmoof_nickname("syn10x")
-        return None, val_df
+    elif dataset_name == "syn10x":
+        full_df = pcp_df_of_non_shmoof_nickname("syn10x")
+        val_sample_ids = ["d4"] # this one has about 25% of the data
+        return train_val_split_from_val_sample_ids(full_df, val_sample_ids)
     elif dataset_name == "val_oracleshmoofcnn10k":
         val_df = pcp_df_of_non_shmoof_nickname("oracleshmoofcnn10k")
         return None, val_df
