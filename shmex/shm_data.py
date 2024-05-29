@@ -166,7 +166,9 @@ def train_val_dfs_of_nickname(dataset_name):
         val_sample_ids = ["d4"] # this one has about 25% of the data
         return train_val_split_from_val_sample_ids(full_df, val_sample_ids)
     elif dataset_name.startswith("val_syn10x"):
-        val_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count("syn10x")
+        # remove the "val_" prefix
+        truncated_dataset_name = dataset_name[4:]
+        val_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(truncated_dataset_name)
         return None, val_df
     elif dataset_name == "val_oracleshmoofcnn10k":
         val_df = pcp_df_of_non_shmoof_nickname("oracleshmoofcnn10k")
