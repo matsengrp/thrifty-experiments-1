@@ -199,4 +199,8 @@ def train_val_dfs_of_nicknames(dataset_names):
         if train_df is not None:
             train_dfs.append(train_df)
         val_dfs.append(val_df)
-    return tuple([pd.concat(dfs).reset_index(drop=True) for dfs in [train_dfs, val_dfs]])
+    def concat_dfs(dfs):
+        if len(dfs) == 0:
+            return None
+        return pd.concat(dfs).reset_index(drop=True)
+    return tuple([concat_dfs(dfs) for dfs in [train_dfs, val_dfs]])
