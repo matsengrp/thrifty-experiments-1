@@ -99,6 +99,7 @@ def create_model(model_name):
             raise ValueError(f"Unknown model key: {model_name}")
     else:
         raise ValueError(f"Unknown model key: {model_name}")
+    model.to(device)
     return model
 
 
