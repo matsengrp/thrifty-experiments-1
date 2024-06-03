@@ -196,4 +196,4 @@ def optimized_branch_lengths_of_crepe(crepe, pcp_df):
         )
     burrito.standardize_and_optimize_branch_lengths()
 
-    return burrito.val_loader.dataset.branch_lengths
+    return burrito.val_dataset.branch_lengths

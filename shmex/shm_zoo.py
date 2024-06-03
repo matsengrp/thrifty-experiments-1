@@ -172,10 +172,10 @@ def train_model(
         )
 
     burrito.save_crepe(crepe_dest_path)
-    burrito.train_loader.dataset.export_branch_lengths(
+    burrito.train_dataset.export_branch_lengths(
         crepe_dest_path + ".train_branch_lengths.csv"
     )
-    burrito.val_loader.dataset.export_branch_lengths(
+    burrito.val_dataset.export_branch_lengths(
         crepe_dest_path + ".val_branch_lengths.csv"
     )
 
@@ -199,5 +199,5 @@ def standardize_and_optimize_branch_lengths(model, pcp_df):
     burrito.standardize_and_optimize_branch_lengths(optimization_tol=1e-4)
 
     pcp_df["orig_branch_length"] = pcp_df["branch_length"]
-    pcp_df["branch_length"] = burrito.val_loader.dataset.branch_lengths
+    pcp_df["branch_length"] = burrito.val_dataset.branch_lengths
     return pcp_df
