@@ -27,6 +27,7 @@ sys.path.append("..")
 from shmex.shm_data import train_val_dfs_of_nicknames
 from shmex.shm_zoo import standardize_and_optimize_branch_lengths
 
+
 # Taken from shmple.
 def r_precision(y_true: list[np.ndarray], y_pred: list[np.ndarray]):
 
@@ -67,18 +68,24 @@ def reset_outside_of_shmoof_region_single(indicator, reset_value):
     indicator[320:] = reset_value
     return indicator
 
-    
+
 def reset_outside_of_shmoof_region(indicators, reset_value):
-    return [reset_outside_of_shmoof_region_single(indicator, reset_value) for indicator in indicators]
+    return [
+        reset_outside_of_shmoof_region_single(indicator, reset_value)
+        for indicator in indicators
+    ]
 
 
 def mut_accuracy_stats(mutation_indicator_list, rates_list, bl_array, mask_list):
-    assert len(mutation_indicator_list) == len(rates_list) == len(bl_array) == len(mask_list)
+    assert (
+        len(mutation_indicator_list)
+        == len(rates_list)
+        == len(bl_array)
+        == len(mask_list)
+    )
     rates_list = [
         rates[: len(indicator)] * bl
-        for indicator, rates, bl in zip(
-            mutation_indicator_list, rates_list, bl_array
-        )
+        for indicator, rates, bl in zip(mutation_indicator_list, rates_list, bl_array)
     ]
     rates_list = [rates[mask] for rates, mask in zip(rates_list, mask_list)]
     mutation_indicator_list = [
@@ -90,7 +97,7 @@ def mut_accuracy_stats(mutation_indicator_list, rates_list, bl_array, mask_list)
         "AUROC": metrics.roc_auc_score(all_indicators, all_mutabilities),
         "AUPRC": metrics.average_precision_score(all_indicators, all_mutabilities),
         "r-prec": r_precision(mutation_indicator_list, rates_list),
-        "mut_pos_ll": - metrics.log_loss(
+        "mut_pos_ll": -metrics.log_loss(
             all_indicators, all_mutabilities, labels=[0, 1]
         ),
     }
@@ -111,15 +118,24 @@ def base_accuracy_stats(base_idxs_list, csp_list):
     # Since filtered_base_idxs_list contains class indices from 0 to 3, use them to create one-hot encodings
     num_classes = 4
     true_labels_one_hot = np.eye(num_classes)[filtered_base_idxs_arr.astype(int)]
-    cat_log_like = - metrics.log_loss(true_labels_one_hot, filtered_csp_arr)
+    cat_log_like = -metrics.log_loss(true_labels_one_hot, filtered_csp_arr)
 
     return {"sub_acc": accuracy, "base_ll": cat_log_like}
 
 
-def oe_plot_of(ratess, masks, branch_lengths, mut_indicators, suptitle_prefix="", binning=None, restrict_to_shmoof_region=False, **oe_kwargs):
+def oe_plot_of(
+    ratess,
+    masks,
+    branch_lengths,
+    mut_indicators,
+    suptitle_prefix="",
+    binning=None,
+    restrict_to_shmoof_region=False,
+    **oe_kwargs,
+):
     """
     Glue code to create an observed vs. expected plot from the given model outputs.
-    
+
     Note that `oe_kwargs` are directly passed to `evaluation.plot_observed_vs_expected`.
     """
     mut_probs_l = []
@@ -128,35 +144,51 @@ def oe_plot_of(ratess, masks, branch_lengths, mut_indicators, suptitle_prefix=""
     if restrict_to_shmoof_region:
         masks = reset_outside_of_shmoof_region(masks, 0)
 
-    for rates, mask, branch_length, mut_indicator in zip(ratess, masks, branch_lengths, mut_indicators):
+    for rates, mask, branch_length, mut_indicator in zip(
+        ratess, masks, branch_lengths, mut_indicators
+    ):
         mut_probs = 1.0 - torch.exp(-rates * branch_length)
         mut_probs_l.append(mut_probs[mask])
         mut_indicators_l.append(mut_indicator[mask])
 
-    oe_plot_df = pd.DataFrame({
-        "prob": torch.cat(mut_probs_l).numpy(),
-        "mutation": np.concatenate(mut_indicators_l),
-    })
+    oe_plot_df = pd.DataFrame(
+        {
+            "prob": torch.cat(mut_probs_l).numpy(),
+            "mutation": np.concatenate(mut_indicators_l),
+        }
+    )
 
     fig, axs = plt.subplots(1, 1, figsize=(12, 5))
-    result_dict = evaluation.plot_observed_vs_expected(oe_plot_df, None, axs, None, binning=binning, **oe_kwargs)
+    result_dict = evaluation.plot_observed_vs_expected(
+        oe_plot_df, None, axs, None, binning=binning, **oe_kwargs
+    )
     if suptitle_prefix != "":
         suptitle_prefix = suptitle_prefix + "; "
-    fig.suptitle(f"{suptitle_prefix}overlap={result_dict['overlap']:.3g}, residual={result_dict['residual']:.3g}", fontsize=16)
+    fig.suptitle(
+        f"{suptitle_prefix}overlap={result_dict['overlap']:.3g}, residual={result_dict['residual']:.3g}",
+        fontsize=16,
+    )
     plt.tight_layout()
 
     return fig, result_dict
 
 
-def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_evaluation_to_shmoof_region=False):
-    matplotlib.use('Agg')
+def write_test_accuracy(
+    crepe_prefix,
+    dataset_name,
+    directory=".",
+    restrict_evaluation_to_shmoof_region=False,
+):
+    matplotlib.use("Agg")
     crepe_basename = os.path.basename(crepe_prefix)
     crepe = load_crepe(crepe_prefix)
     _, pcp_df = train_val_dfs_of_nicknames(dataset_name)
     standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
     ratess, cspss = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
     site_count = crepe.encoder.site_count
-    mut_indicators, base_idxss, masks = ragged_np_pcp_encoding(pcp_df["parent"], pcp_df["child"], site_count)
+    mut_indicators, base_idxss, masks = ragged_np_pcp_encoding(
+        pcp_df["parent"], pcp_df["child"], site_count
+    )
     val_bls = pcp_df["branch_length"].values
     if restrict_evaluation_to_shmoof_region:
         mut_indicators = reset_outside_of_shmoof_region(mut_indicators, 0)
@@ -171,7 +203,9 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_eval
     df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
     df_dict.update(base_accuracy_stats(base_idxss, cspss))
     comparison_title = f"{crepe_basename}-ON-{dataset_name}"
-    fig, oe_results = oe_plot_of(ratess, masks, val_bls, mut_indicators, comparison_title)
+    fig, oe_results = oe_plot_of(
+        ratess, masks, val_bls, mut_indicators, comparison_title
+    )
     fig.savefig(f"{directory}/{comparison_title}.pdf")
     oe_results.pop("counts_twinx_ax")
     df_dict.update(oe_results)
@@ -180,8 +214,8 @@ def write_test_accuracy(crepe_prefix, dataset_name, directory=".", restrict_eval
         f"{directory}/{comparison_title}.csv",
         index=False,
     )
-    
-    
+
+
 def optimized_branch_lengths_of_crepe(crepe, pcp_df):
     """
     Modify the branch lengths in the pcp_df DataFrame to be the optimized
@@ -190,10 +224,10 @@ def optimized_branch_lengths_of_crepe(crepe, pcp_df):
     site_count = crepe.encoder.site_count
     model = crepe.model
     burrito = RSSHMBurrito(
-            None,
-            SHMoofDataset(pcp_df, kmer_length=model.kmer_length, site_count=site_count),
-            model,
-        )
+        None,
+        SHMoofDataset(pcp_df, kmer_length=model.kmer_length, site_count=site_count),
+        model,
+    )
     burrito.standardize_and_optimize_branch_lengths()
 
     return burrito.val_dataset.branch_lengths

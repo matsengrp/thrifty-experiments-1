@@ -77,9 +77,9 @@ def load_shmoof_dataframes(
     # else
     full_shmoof_df["nickname"] = full_shmoof_df["sample_id"].astype(str).str[-2:]
     for small_nickname in ["80", "37", "50", "07"]:
-        full_shmoof_df.loc[
-            full_shmoof_df["nickname"] == small_nickname, "nickname"
-        ] = "small"
+        full_shmoof_df.loc[full_shmoof_df["nickname"] == small_nickname, "nickname"] = (
+            "small"
+        )
 
     val_df = full_shmoof_df[full_shmoof_df["nickname"] == val_nickname]
     train_df = full_shmoof_df.drop(val_df.index)
@@ -163,12 +163,14 @@ def train_val_dfs_of_nickname(dataset_name):
         return None, val_df
     elif dataset_name.startswith("syn10x"):
         full_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(dataset_name)
-        val_sample_ids = ["d4"] # this one has about 25% of the data
+        val_sample_ids = ["d4"]  # this one has about 25% of the data
         return train_val_split_from_val_sample_ids(full_df, val_sample_ids)
     elif dataset_name.startswith("val_syn10x"):
         # remove the "val_" prefix
         truncated_dataset_name = dataset_name[4:]
-        val_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(truncated_dataset_name)
+        val_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(
+            truncated_dataset_name
+        )
         return None, val_df
     elif dataset_name == "val_oracleshmoofcnn10k":
         val_df = pcp_df_of_non_shmoof_nickname("oracleshmoofcnn10k")
@@ -176,7 +178,7 @@ def train_val_dfs_of_nickname(dataset_name):
     elif dataset_name == "val_oracletangcnn":
         val_df = pcp_df_of_non_shmoof_nickname("oracletangcnn")
         return None, val_df
-     # else we are doing a shmoof dataset
+    # else we are doing a shmoof dataset
     if dataset_name == "tst":
         sample_count = 1000
         val_nickname = "small"
@@ -204,8 +206,10 @@ def train_val_dfs_of_nicknames(dataset_names):
         if train_df is not None:
             train_dfs.append(train_df)
         val_dfs.append(val_df)
+
     def concat_dfs(dfs):
         if len(dfs) == 0:
             return None
         return pd.concat(dfs).reset_index(drop=True)
+
     return tuple([concat_dfs(dfs) for dfs in [train_dfs, val_dfs]])

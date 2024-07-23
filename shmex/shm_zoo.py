@@ -22,7 +22,7 @@ from shmex.shm_data import train_val_dfs_of_nicknames
 
 site_count = 500
 epochs = 1000
-#device = pick_device()
+# device = pick_device()
 print("Using CPU")
 device = "cpu"
 
@@ -192,10 +192,10 @@ def standardize_and_optimize_branch_lengths(model, pcp_df):
     smaller.
     """
     burrito = RSSHMBurrito(
-            None,
-            SHMoofDataset(pcp_df, kmer_length=model.kmer_length, site_count=site_count),
-            model,
-        )
+        None,
+        SHMoofDataset(pcp_df, kmer_length=model.kmer_length, site_count=site_count),
+        model,
+    )
     burrito.standardize_and_optimize_branch_lengths(optimization_tol=1e-4)
 
     pcp_df["orig_branch_length"] = pcp_df["branch_length"]
