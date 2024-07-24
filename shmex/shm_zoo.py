@@ -163,6 +163,8 @@ def train_model(
         **burrito_params,
         name=trained_model_str(model_name, dataset_name, training_method, seed),
     )
+    burrito.train_dataset.to(device)
+    burrito.val_dataset.to(device)
 
     if dataset_name.startswith("tst"):
         burrito.joint_train(epochs=2, training_method=training_method)
