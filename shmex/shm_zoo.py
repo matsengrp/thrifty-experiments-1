@@ -133,7 +133,7 @@ def train_model(
         "batch_size": 1024,
         "learning_rate": 0.001,
         "min_learning_rate": 1e-6,  # early stopping!
-        "l2_regularization_coeff": 1e-6,
+        "weight_decay": 1e-6,
     }
     # Update default parameters with any provided keyword arguments
     burrito_params = {**default_burrito_params, **burrito_kwargs}
