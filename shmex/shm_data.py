@@ -1,4 +1,5 @@
 import os
+import re
 
 import pandas as pd
 
@@ -11,7 +12,7 @@ dataset_dict = {
     "cui": "data/v0/cui-et-al-oof_pcp_2024-02-22_MASKED_NI.csv.gz",
     "cuims": "data/v0/cui-et-al-oof-msproc_pcp_2024-02-29_MASKED_NI.csv",
     "greiff": "data/v0/greiff-systems-oof_pcp_2023-11-30_MASKED_NI.csv.gz",
-    "syn10x": "data/v0/wyatt-10x-1p5m_pcp_2023-11-30_NI_SYN.csv.gz",
+    "syn10x": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_SYN.csv.gz",
     "oracleshmoofcnn10k": "data/v0/mimic_shmoof_CNNJoiLrgShmoofSmall.10K.csv.gz",
     "oracletangcnn": "data/v0/mimic_tang_CNNJoiLrgShmoofSmall.csv.gz",
 }
@@ -23,6 +24,13 @@ def localify(path):
 
 
 dataset_dict = {name: localify(path) for name, path in dataset_dict.items()}
+
+
+def parent_and_child_differ(row):
+    for p, c in zip(row["parent"], row["child"]):
+        if c != "N" and p != c and p != "N":
+            return True
+    return False
 
 
 def load_shmoof_dataframes(
@@ -69,9 +77,9 @@ def load_shmoof_dataframes(
     # else
     full_shmoof_df["nickname"] = full_shmoof_df["sample_id"].astype(str).str[-2:]
     for small_nickname in ["80", "37", "50", "07"]:
-        full_shmoof_df.loc[
-            full_shmoof_df["nickname"] == small_nickname, "nickname"
-        ] = "small"
+        full_shmoof_df.loc[full_shmoof_df["nickname"] == small_nickname, "nickname"] = (
+            "small"
+        )
 
     val_df = full_shmoof_df[full_shmoof_df["nickname"] == val_nickname]
     train_df = full_shmoof_df.drop(val_df.index)
@@ -85,12 +93,35 @@ def pcp_df_of_non_shmoof_nickname(dataset_name, sample_count=None):
     print(f"Loading {dataset_dict[dataset_name]}")
 
     pcp_df = pd.read_csv(dataset_dict[dataset_name], index_col=0)
-    pcp_df = pcp_df[pcp_df["parent"] != pcp_df["child"]]
+    pcp_df = pcp_df[pcp_df.apply(parent_and_child_differ, axis=1)]
     if sample_count is not None:
         pcp_df = pcp_df.sample(sample_count)
     pcp_df = pcp_df.reset_index(drop=True)
 
     return pcp_df
+
+
+def pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(dataset_name):
+    """
+    If dataset_name ends with "Yk" where Y is a number, then we take that number
+    and call pcp_df_of_non_shmoof_nickname with that number of samples.
+    """
+    if dataset_name[-1] == "k":
+        regex = r"(.*[^\d])(\d+)k"
+        dataset_name, sample_count = re.match(regex, dataset_name).groups()
+        sample_count = int(sample_count) * 1000
+    else:
+        sample_count = None
+    return pcp_df_of_non_shmoof_nickname(dataset_name, sample_count)
+
+
+def train_val_split_from_val_sample_ids(full_df, val_sample_ids):
+    """
+    Splits the full_df into train and validation dataframes based on the val_sample_ids.
+    """
+    val_df = full_df[full_df["sample_id"].isin(val_sample_ids)]
+    train_df = full_df.drop(val_df.index)
+    return train_df, val_df
 
 
 def train_val_dfs_of_nickname(dataset_name):
@@ -120,9 +151,7 @@ def train_val_dfs_of_nickname(dataset_name):
             "hepb-vax_m2_plasma",
             "np-hel-vax_m4_plasma",
         ]
-        val_df = full_df[full_df["sample_id"].isin(val_sample_ids)]
-        train_df = full_df.drop(val_df.index)
-        return train_df, val_df
+        return train_val_split_from_val_sample_ids(full_df, val_sample_ids)
     elif dataset_name == "val_cui":
         val_df = pcp_df_of_non_shmoof_nickname("cui")
         return None, val_df
@@ -132,8 +161,16 @@ def train_val_dfs_of_nickname(dataset_name):
     elif dataset_name == "val_tangshm":
         val_df = pcp_df_of_non_shmoof_nickname("tangshm")
         return None, val_df
-    elif dataset_name == "val_syn10x":
-        val_df = pcp_df_of_non_shmoof_nickname("syn10x")
+    elif dataset_name.startswith("syn10x"):
+        full_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(dataset_name)
+        val_sample_ids = ["d4"]  # this one has about 25% of the data
+        return train_val_split_from_val_sample_ids(full_df, val_sample_ids)
+    elif dataset_name.startswith("val_syn10x"):
+        # remove the "val_" prefix
+        truncated_dataset_name = dataset_name[4:]
+        val_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(
+            truncated_dataset_name
+        )
         return None, val_df
     elif dataset_name == "val_oracleshmoofcnn10k":
         val_df = pcp_df_of_non_shmoof_nickname("oracleshmoofcnn10k")
@@ -141,7 +178,7 @@ def train_val_dfs_of_nickname(dataset_name):
     elif dataset_name == "val_oracletangcnn":
         val_df = pcp_df_of_non_shmoof_nickname("oracletangcnn")
         return None, val_df
-     # else we are doing a shmoof dataset
+    # else we are doing a shmoof dataset
     if dataset_name == "tst":
         sample_count = 1000
         val_nickname = "small"
@@ -153,3 +190,26 @@ def train_val_dfs_of_nickname(dataset_name):
         dataset_dict["shmoof"], sample_count=sample_count, val_nickname=val_nickname
     )
     return train_df, val_df
+
+
+def train_val_dfs_of_nicknames(dataset_names):
+    """
+    Splits dataset_names by "+", runs train_val_dfs_of_nickname on each one,
+    and combines each pair of train and validation dataframes into a single
+    pair of train and validation dataframes.
+    """
+    dataset_names = dataset_names.split("+")
+    train_dfs = []
+    val_dfs = []
+    for dataset_name in dataset_names:
+        train_df, val_df = train_val_dfs_of_nickname(dataset_name)
+        if train_df is not None:
+            train_dfs.append(train_df)
+        val_dfs.append(val_df)
+
+    def concat_dfs(dfs):
+        if len(dfs) == 0:
+            return None
+        return pd.concat(dfs).reset_index(drop=True)
+
+    return tuple([concat_dfs(dfs) for dfs in [train_dfs, val_dfs]])

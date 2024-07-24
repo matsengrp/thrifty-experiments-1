@@ -15,7 +15,7 @@ from netam.framework import (
 from netam import models
 
 sys.path.append("..")
-from shmex.shm_data import train_val_dfs_of_nickname
+from shmex.shm_data import train_val_dfs_of_nicknames
 
 # Very helpful for debugging!
 # torch.autograd.set_detect_anomaly(True)
@@ -23,6 +23,8 @@ from shmex.shm_data import train_val_dfs_of_nickname
 site_count = 500
 epochs = 1000
 device = pick_device()
+# print("Using CPU")
+# device = "cpu"
 
 model_parameters = {
     "sml": {
@@ -99,6 +101,7 @@ def create_model(model_name):
             raise ValueError(f"Unknown model key: {model_name}")
     else:
         raise ValueError(f"Unknown model key: {model_name}")
+    model.to(device)
     return model
 
 
@@ -141,7 +144,7 @@ def train_model(
     # If we want to ensure reproducibility, we would also set the following:
     # torch.backends.cudnn.deterministic = True
     # torch.backends.cudnn.benchmark = False
-    train_df, val_df = train_val_dfs_of_nickname(dataset_name)
+    train_df, val_df = train_val_dfs_of_nicknames(dataset_name)
     if crepe_dest_path is None:
         crepe_dest_path = trained_model_path(
             model_name, dataset_name, training_method, seed
@@ -161,7 +164,7 @@ def train_model(
         name=trained_model_str(model_name, dataset_name, training_method, seed),
     )
 
-    if dataset_name == "tst":
+    if dataset_name.startswith("tst"):
         burrito.joint_train(epochs=2, training_method=training_method)
     else:
         burrito.joint_train(
@@ -169,10 +172,10 @@ def train_model(
         )
 
     burrito.save_crepe(crepe_dest_path)
-    burrito.train_loader.dataset.export_branch_lengths(
+    burrito.train_dataset.export_branch_lengths(
         crepe_dest_path + ".train_branch_lengths.csv"
     )
-    burrito.val_loader.dataset.export_branch_lengths(
+    burrito.val_dataset.export_branch_lengths(
         crepe_dest_path + ".val_branch_lengths.csv"
     )
 
@@ -189,12 +192,12 @@ def standardize_and_optimize_branch_lengths(model, pcp_df):
     smaller.
     """
     burrito = RSSHMBurrito(
-            None,
-            SHMoofDataset(pcp_df, kmer_length=model.kmer_length, site_count=site_count),
-            model,
-        )
+        None,
+        SHMoofDataset(pcp_df, kmer_length=model.kmer_length, site_count=site_count),
+        model,
+    )
     burrito.standardize_and_optimize_branch_lengths(optimization_tol=1e-4)
 
     pcp_df["orig_branch_length"] = pcp_df["branch_length"]
-    pcp_df["branch_length"] = burrito.val_loader.dataset.branch_lengths
+    pcp_df["branch_length"] = burrito.val_dataset.branch_lengths
     return pcp_df
