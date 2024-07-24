@@ -22,9 +22,9 @@ from shmex.shm_data import train_val_dfs_of_nicknames
 
 site_count = 500
 epochs = 1000
-# device = pick_device()
-print("Using CPU")
-device = "cpu"
+device = pick_device()
+# print("Using CPU")
+# device = "cpu"
 
 model_parameters = {
     "sml": {
