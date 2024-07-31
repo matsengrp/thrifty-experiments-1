@@ -4,6 +4,6 @@ model_names: ["fivemer", "rsshmoof", "cnn_joi_lrg", "cnn_ind_med"]
 train_data_nicknames: ["shmoof_small", "shmoof_small+syn10x"]
 test_data_nicknames: ["shmoof_small", "val_tangshm", "shmoof_59", "val_syn10x25k"]
 # test_data_nicknames: ["shmoof_small", "val_tangshm", "val_oracleshmoofcnn10k", "val_oracletangcnn"]
-training_methods: ["fixed"]
+training_methods: ["fixed", "full"]
 # training_methods: ["fixed", "yun", "full"]
 replicate_count: 3
