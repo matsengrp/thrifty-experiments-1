@@ -21,7 +21,7 @@ from netam.framework import (
     RSSHMBurrito,
     SHMoofDataset,
 )
-from epam import evaluation
+from epam import oe_plot
 
 sys.path.append("..")
 from shmex.shm_data import train_val_dfs_of_nicknames
@@ -159,7 +159,7 @@ def oe_plot_of(
     )
 
     fig, axs = plt.subplots(1, 1, figsize=(12, 5))
-    result_dict = evaluation.plot_observed_vs_expected(
+    result_dict = oe_plot.plot_observed_vs_expected(
         oe_plot_df, None, axs, None, binning=binning, **oe_kwargs
     )
     if suptitle_prefix != "":
