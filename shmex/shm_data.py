@@ -15,6 +15,8 @@ dataset_dict = {
     "syn10x": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_SYN.csv.gz",
     "oracleshmoofcnn10k": "data/v0/mimic_shmoof_CNNJoiLrgShmoofSmall.10K.csv.gz",
     "oracletangcnn": "data/v0/mimic_tang_CNNJoiLrgShmoofSmall.csv.gz",
+    "v1wyatt": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_noN_no-naive.csv.gz",
+    "v1rodriguez": "data/v1/rodriguez-airr-seq-race-prod_pcp_2024-04-01_MASKED_NI_noN_no-naive.csv.gz",
 }
 
 
@@ -24,6 +26,17 @@ def localify(path):
 
 
 dataset_dict = {name: localify(path) for name, path in dataset_dict.items()}
+
+holdout_dict = {
+    "greiff": [
+        "no-vax_m5_plasma",
+        "ova-vax_m1_plasma",
+        "hepb-vax_m2_plasma",
+        "np-hel-vax_m4_plasma",
+    ],
+    "syn10x": ["d4"], # this one has about 25% of the data
+    "v1wyattprod": ["d4"],
+}
 
 
 def parent_and_child_differ(row):
@@ -145,13 +158,7 @@ def train_val_dfs_of_nickname(dataset_name):
         return full_df, full_df.copy()
     elif dataset_name == "greiff":
         full_df = pcp_df_of_non_shmoof_nickname("greiff")
-        val_sample_ids = [
-            "no-vax_m5_plasma",
-            "ova-vax_m1_plasma",
-            "hepb-vax_m2_plasma",
-            "np-hel-vax_m4_plasma",
-        ]
-        return train_val_split_from_val_sample_ids(full_df, val_sample_ids)
+        return train_val_split_from_val_sample_ids(full_df, holdout_dict["greiff"])
     elif dataset_name == "val_cui":
         val_df = pcp_df_of_non_shmoof_nickname("cui")
         return None, val_df
@@ -163,9 +170,15 @@ def train_val_dfs_of_nickname(dataset_name):
         return None, val_df
     elif dataset_name.startswith("syn10x"):
         full_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(dataset_name)
-        val_sample_ids = ["d4"]  # this one has about 25% of the data
-        return train_val_split_from_val_sample_ids(full_df, val_sample_ids)
+        return train_val_split_from_val_sample_ids(full_df, holdout_dict["syn10x"])
     elif dataset_name.startswith("val_syn10x"):
+        # remove the "val_" prefix
+        truncated_dataset_name = dataset_name[4:]
+        val_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(
+            truncated_dataset_name
+        )
+        return None, val_df
+    elif dataset_name.startswith("val_v1rodriguez"):
         # remove the "val_" prefix
         truncated_dataset_name = dataset_name[4:]
         val_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(
