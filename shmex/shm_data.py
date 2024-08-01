@@ -35,7 +35,7 @@ holdout_dict = {
         "np-hel-vax_m4_plasma",
     ],
     "syn10x": ["d4"], # this one has about 25% of the data
-    "v1wyattprod": ["d4"],
+    "v1wyatt": ["d4"],
 }
 
 
@@ -178,6 +178,9 @@ def train_val_dfs_of_nickname(dataset_name):
             truncated_dataset_name
         )
         return None, val_df
+    elif dataset_name.startswith("v1wyatt"):
+        full_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(dataset_name)
+        return train_val_split_from_val_sample_ids(full_df, holdout_dict["v1wyatt"])
     elif dataset_name.startswith("val_v1rodriguez"):
         # remove the "val_" prefix
         truncated_dataset_name = dataset_name[4:]
