@@ -196,6 +196,7 @@ def train_val_dfs_of_nickname(dataset_name):
         sample_count = 1000
         val_nickname = "small"
     else:
+        print(f"Interpreting {dataset_name} as a shmoof dataset")
         sample_count = None
         shmoof, val_nickname = dataset_name.split("_")
         assert shmoof == "shmoof", f"Dataset {dataset_name} not recognized"
