@@ -23,8 +23,6 @@ from shmex.shm_data import train_val_dfs_of_nicknames
 site_count = 500
 epochs = 1000
 device = pick_device()
-# print("Using CPU")
-# device = "cpu"
 
 model_parameters = {
     "sml": {
@@ -133,7 +131,7 @@ def train_model(
         "batch_size": 1024,
         "learning_rate": 0.001,
         "min_learning_rate": 1e-6,  # early stopping!
-        "l2_regularization_coeff": 1e-6,
+        "weight_decay": 1e-6,
     }
     # Update default parameters with any provided keyword arguments
     burrito_params = {**default_burrito_params, **burrito_kwargs}
@@ -163,6 +161,8 @@ def train_model(
         **burrito_params,
         name=trained_model_str(model_name, dataset_name, training_method, seed),
     )
+    burrito.train_dataset.to(device)
+    burrito.val_dataset.to(device)
 
     if dataset_name.startswith("tst"):
         burrito.joint_train(epochs=2, training_method=training_method)

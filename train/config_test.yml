@@ -1,5 +1,7 @@
 model_names: ["rsshmoof"]
 train_data_nicknames: ["tst+syn10x1k"]
-test_data_nicknames: ["tst", "val_syn10x5k"]
-training_methods: ["yun"]
+test_data_nicknames: ["tst"]
+#test_data_nicknames: ["tst", "val_syn10x5k"]
+training_methods: ["fixed"]
 replicate_count: 1
+
