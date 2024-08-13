@@ -23,8 +23,7 @@ from netam.framework import (
 )
 from epam import oe_plot
 
-sys.path.append("..")
-from shmex.shm_data import train_val_dfs_of_nicknames
+from shmex.shm_data import parent_and_child_differ, train_val_dfs_of_nicknames
 from shmex.shm_zoo import standardize_and_optimize_branch_lengths
 
 
@@ -197,6 +196,7 @@ def write_test_accuracy(
     _, pcp_df = train_val_dfs_of_nicknames(dataset_name)
     if restrict_evaluation_to_shmoof_region:
         pcp_df["child"] = make_n_outside_of_shmoof_region(pcp_df["child"])
+        pcp_df = pcp_df[pcp_df.apply(parent_and_child_differ, axis=1)]
     pcp_df = standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
     # write the optimized branch lengths to a file with no index
     pcp_df.to_csv(f"{directory}/{comparison_title}.branch_lengths_csv", index=False, columns=["branch_length"])
@@ -214,7 +214,7 @@ def write_test_accuracy(
     }
     df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
     df_dict.update(base_accuracy_stats(base_idxss, cspss))
-    fig, oe_results = oe_plot_of(
+    fig, oe_results, _ = oe_plot_of(
         ratess, masks, val_bls, mut_indicators, comparison_title
     )
     fig.savefig(f"{directory}/{comparison_title}.pdf")
