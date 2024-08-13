@@ -21,6 +21,7 @@ restrict_evaluation_to_shmoof_region = True
 
 fixed_model_names = ["s5f","cnn_ind_med-shmoof_small"]
 final_output_path = f"_ignore/{species}_model_compare.csv"
+final_fig_path = f"_ignore/{species}_model_compare.pdf"
 
 
 def trained_model_yml(model_name, data_nickname, training_method, seed):
@@ -34,6 +35,11 @@ def fixed_model_yml(model_name):
 def test_output_path(model_name, data_nickname, training_method, seed, dataset_name):
     trained_model = trained_model_str(model_name, data_nickname, training_method, seed)
     return f"_ignore/test_output/{trained_model}-ON-{dataset_name}.csv"
+
+
+def test_fig_path(model_name, data_nickname, training_method, seed, dataset_name):
+    trained_model = trained_model_str(model_name, data_nickname, training_method, seed)
+    return f"_ignore/test_output/{trained_model}-ON-{dataset_name}.pdf"
 
 
 def test_output_path_fixed(model_name, dataset_name):
@@ -87,4 +93,20 @@ rule concatenate_csvs:
     shell:
         """
         epam concatenate_csvs $(echo '{input.csvs}' | tr ' ' ',') {output.combined_csv}
+        """
+
+
+rule concatenate_figs:
+    input:
+        figs = [
+            test_fig_path(m, d, tm, s, td)
+                for m in model_names
+                for d in train_data_nicknames
+                for tm in training_methods
+                for td in test_data_nicknames]
+    output:
+        combined_fig = final_fig_path
+    shell:
+        """
+        pdfunite {input.figs} {output.combined_fig}
         """
