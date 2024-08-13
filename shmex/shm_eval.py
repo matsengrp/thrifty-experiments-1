@@ -62,18 +62,31 @@ def ragged_np_pcp_encoding(parents, children, site_count=None):
     return mutation_indicator_list, base_idxs_list, mask_list
 
 
-def reset_outside_of_shmoof_region_single(indicator, reset_value):
-    indicator = indicator.copy()
-    indicator[:80] = reset_value
-    indicator[320:] = reset_value
-    return indicator
+def make_n_outside_of_shmoof_region_single(seq):
+    """
+    Given a sequence string, replace characters outside the SHMoof region
+    (positions 80 to 319 inclusive) with 'N'.
+
+    Parameters:
+    - seq: string, the input sequence
+
+    Returns:
+    - A modified sequence with 'N' outside the SHMoof region.
+    """
+    # Create the 'N' sequences for the regions outside the SHMoof region
+    early_ns = 'N' * 80
+    late_ns = 'N' * max(0, len(seq) - 320)
+    
+    # Concatenate the early 'N's, the SHMoof region, and the late 'N's
+    shmoof_region = seq[80:320]  # Positions 80 to 319 inclusive
+    result = early_ns + shmoof_region + late_ns
+    
+    return result
 
 
-def reset_outside_of_shmoof_region(indicators, reset_value):
-    return [
-        reset_outside_of_shmoof_region_single(indicator, reset_value)
-        for indicator in indicators
-    ]
+def make_n_outside_of_shmoof_region(seqs):
+    assert isinstance(seqs, list)
+    return [ make_n_outside_of_shmoof_region_single(seq) for seq in seqs ]
 
 
 def mut_accuracy_stats(mutation_indicator_list, rates_list, bl_array, mask_list):
@@ -130,7 +143,6 @@ def oe_plot_of(
     mut_indicators,
     suptitle_prefix="",
     binning=None,
-    restrict_to_shmoof_region=False,
     **oe_kwargs,
 ):
     """
@@ -140,9 +152,6 @@ def oe_plot_of(
     """
     mut_probs_l = []
     mut_indicators_l = []
-
-    if restrict_to_shmoof_region:
-        masks = reset_outside_of_shmoof_region(masks, 0)
 
     for rates, mask, branch_length, mut_indicator in zip(
         ratess, masks, branch_lengths, mut_indicators
@@ -158,9 +167,9 @@ def oe_plot_of(
         }
     )
 
-    fig, axs = plt.subplots(1, 1, figsize=(12, 5))
+    fig, ax = plt.subplots(1, 1, figsize=(12, 5))
     result_dict = oe_plot.plot_observed_vs_expected(
-        oe_plot_df, None, axs, None, binning=binning, **oe_kwargs
+        oe_plot_df, None, ax, None, binning=binning, **oe_kwargs
     )
     if suptitle_prefix != "":
         suptitle_prefix = suptitle_prefix + "; "
@@ -168,9 +177,10 @@ def oe_plot_of(
         f"{suptitle_prefix}overlap={result_dict['overlap']:.3g}, residual={result_dict['residual']:.3g}",
         fontsize=16,
     )
+    ax.set_xlabel(r"$\log_{10}(\text{substitution probability})$")
     plt.tight_layout()
 
-    return fig, result_dict
+    return fig, result_dict, oe_plot_df
 
 
 def write_test_accuracy(
@@ -184,6 +194,8 @@ def write_test_accuracy(
     comparison_title = f"{crepe_basename}-ON-{dataset_name}"
     crepe = load_crepe(crepe_prefix)
     _, pcp_df = train_val_dfs_of_nicknames(dataset_name)
+    if restrict_evaluation_to_shmoof_region:
+        pcp_df["child"] = make_n_outside_of_shmoof_region(pcp_df["child"])
     pcp_df = standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
     # write the optimized branch lengths to a file with no index
     pcp_df.to_csv(f"{directory}/{comparison_title}.branch_lengths_csv", index=False, columns=["branch_length"])
@@ -193,10 +205,6 @@ def write_test_accuracy(
         pcp_df["parent"], pcp_df["child"], site_count
     )
     val_bls = pcp_df["branch_length"].values
-    if restrict_evaluation_to_shmoof_region:
-        mut_indicators = reset_outside_of_shmoof_region(mut_indicators, 0)
-        base_idxss = reset_outside_of_shmoof_region(base_idxss, -1)
-        masks = reset_outside_of_shmoof_region(masks, 0)
     df_dict = {
         "crepe_prefix": crepe_prefix,
         "crepe_basename": crepe_basename,
