@@ -181,9 +181,12 @@ def write_test_accuracy(
 ):
     matplotlib.use("Agg")
     crepe_basename = os.path.basename(crepe_prefix)
+    comparison_title = f"{crepe_basename}-ON-{dataset_name}"
     crepe = load_crepe(crepe_prefix)
     _, pcp_df = train_val_dfs_of_nicknames(dataset_name)
-    standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
+    pcp_df = standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
+    # write the optimized branch lengths to a file with no index
+    pcp_df.to_csv(f"{directory}/{comparison_title}.branch_lengths_csv", index=False, columns=["branch_length"])
     ratess, cspss = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
     site_count = crepe.encoder.site_count
     mut_indicators, base_idxss, masks = ragged_np_pcp_encoding(
@@ -202,7 +205,6 @@ def write_test_accuracy(
     }
     df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
     df_dict.update(base_accuracy_stats(base_idxss, cspss))
-    comparison_title = f"{crepe_basename}-ON-{dataset_name}"
     fig, oe_results = oe_plot_of(
         ratess, masks, val_bls, mut_indicators, comparison_title
     )
