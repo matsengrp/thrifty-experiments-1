@@ -85,7 +85,8 @@ def make_n_outside_of_shmoof_region_single(seq):
 
 
 def make_n_outside_of_shmoof_region(seqs):
-    assert isinstance(seqs, list)
+    # Assert that seqs isn't a string-- it should be an iterable of strings.
+    assert not isinstance(seqs, str)
     return [ make_n_outside_of_shmoof_region_single(seq) for seq in seqs ]
 
 
