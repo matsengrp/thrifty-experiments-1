@@ -61,7 +61,8 @@ rule write_test_accuracy:
     input:
         trained_model=trained_model_yml("{model_name}", "{data_nickname}", "{training_method}", "{seed}"),
     output:
-        test_output=test_output_path("{model_name}", "{data_nickname}", "{training_method}", "{seed}", "{dataset_name}")
+        test_output=test_output_path("{model_name}", "{data_nickname}", "{training_method}", "{seed}", "{dataset_name}"),
+        test_fig=test_fig_path("{model_name}", "{data_nickname}", "{training_method}", "{seed}", "{dataset_name}")
     run:
         crepe_prefix = os.path.splitext(input.trained_model)[0]
         write_test_accuracy(crepe_prefix, wildcards.dataset_name, "_ignore/test_output", restrict_evaluation_to_shmoof_region)
