@@ -200,33 +200,41 @@ def write_test_accuracy(
     pcp_df = standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
     # write the optimized branch lengths to a file with no index
     pcp_df.to_csv(f"{directory}/{comparison_title}.branch_lengths_csv", index=False, columns=["branch_length"])
-    ratess, cspss = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
-    site_count = crepe.encoder.site_count
-    mut_indicators, base_idxss, masks = ragged_np_pcp_encoding(
-        pcp_df["parent"], pcp_df["child"], site_count
-    )
-    val_bls = pcp_df["branch_length"].values
-    df_dict = {
-        "crepe_prefix": crepe_prefix,
-        "crepe_basename": crepe_basename,
-        "parameter_count": parameter_count_of_model(crepe.model),
-        "dataset_name": dataset_name,
-    }
-    df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
-    df_dict.update(base_accuracy_stats(base_idxss, cspss))
-    fig, oe_results, _ = oe_plot_of(
-        ratess, masks, val_bls, mut_indicators, comparison_title
-    )
-    fig.savefig(f"{directory}/{comparison_title}.pdf")
-    oe_results.pop("counts_twinx_ax")
-    df_dict.update(oe_results)
-    df = pd.DataFrame(df_dict, index=[0])
-    df.to_csv(
+
+    def write_test_accuracy_for(pcp_df):
+        ratess, cspss = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
+        site_count = crepe.encoder.site_count
+        mut_indicators, base_idxss, masks = ragged_np_pcp_encoding(
+            pcp_df["parent"], pcp_df["child"], site_count
+        )
+        val_bls = pcp_df["branch_length"].values
+        df_dict = {
+            "crepe_prefix": crepe_prefix,
+            "crepe_basename": crepe_basename,
+            "parameter_count": parameter_count_of_model(crepe.model),
+            "dataset_name": dataset_name,
+        }
+        df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
+        df_dict.update(base_accuracy_stats(base_idxss, cspss))
+        fig, oe_results, _ = oe_plot_of(
+            ratess, masks, val_bls, mut_indicators, comparison_title
+        )
+        fig.savefig(f"{directory}/{comparison_title}.pdf")
+        oe_results.pop("counts_twinx_ax")
+        df_dict.update(oe_results)
+        return pd.DataFrame(df_dict, index=[0])
+    
+    accuracy_df = write_test_accuracy_for(pcp_df)
+
+    print(pcp_df.head())
+
+    accuracy_df.to_csv(
         f"{directory}/{comparison_title}.csv",
         index=False,
     )
 
 
+# TODO what is this for?
 def optimized_branch_lengths_of_crepe(crepe, pcp_df):
     """
     Modify the branch lengths in the pcp_df DataFrame to be the optimized

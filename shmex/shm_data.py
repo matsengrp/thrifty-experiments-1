@@ -224,9 +224,11 @@ def train_val_dfs_of_nicknames(dataset_names):
             train_dfs.append(train_df)
         val_dfs.append(val_df)
 
-    def concat_dfs(dfs):
+    def concat_and_annotate_dfs(dfs):
         if len(dfs) == 0:
             return None
-        return pd.concat(dfs).reset_index(drop=True)
+        df = pd.concat(dfs).reset_index(drop=True)
+        df["v_family"] = df["v_gene"].str.split("-").str[0]
+        return df
 
-    return tuple([concat_dfs(dfs) for dfs in [train_dfs, val_dfs]])
+    return tuple([concat_and_annotate_dfs(dfs) for dfs in [train_dfs, val_dfs]])
