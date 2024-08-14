@@ -201,7 +201,7 @@ def write_test_accuracy(
     # write the optimized branch lengths to a file with no index
     pcp_df.to_csv(f"{directory}/{comparison_title}.branch_lengths_csv", index=False, columns=["branch_length"])
 
-    def write_test_accuracy_for(pcp_df):
+    def test_accuracy_for(pcp_df, suffix):
         ratess, cspss = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
         site_count = crepe.encoder.site_count
         mut_indicators, base_idxss, masks = ragged_np_pcp_encoding(
@@ -212,21 +212,29 @@ def write_test_accuracy(
             "crepe_prefix": crepe_prefix,
             "crepe_basename": crepe_basename,
             "parameter_count": parameter_count_of_model(crepe.model),
-            "dataset_name": dataset_name,
+            "dataset_name": f"{dataset_name}_{suffix}",
         }
         df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
         df_dict.update(base_accuracy_stats(base_idxss, cspss))
         fig, oe_results, _ = oe_plot_of(
             ratess, masks, val_bls, mut_indicators, comparison_title
         )
-        fig.savefig(f"{directory}/{comparison_title}.pdf")
+        fig.savefig(f"{directory}/{comparison_title}_{suffix}.pdf")
         oe_results.pop("counts_twinx_ax")
         df_dict.update(oe_results)
         return pd.DataFrame(df_dict, index=[0])
     
-    accuracy_df = write_test_accuracy_for(pcp_df)
+    accuracy_list = [ test_accuracy_for(pcp_df, "all") ]
 
-    print(pcp_df.head())
+    v_families = ["IGHV3", "IGHV4"]
+    for v_family in v_families:
+        sub_df = pcp_df[pcp_df["v_family"] == v_family]
+        if len(sub_df) > 0:
+            accuracy_list.append(test_accuracy_for(sub_df, v_family))
+        
+    accuracy_list.append(test_accuracy_for(pcp_df[~pcp_df["v_gene"].isin(v_families)], "other"))
+
+    accuracy_df = pd.concat(accuracy_list, ignore_index=True)
 
     accuracy_df.to_csv(
         f"{directory}/{comparison_title}.csv",
