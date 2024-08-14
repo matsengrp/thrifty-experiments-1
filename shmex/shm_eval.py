@@ -1,7 +1,5 @@
 import os
-import sys
-import io
-from IPython.display import Image, display
+
 
 import numpy as np
 import pandas as pd
@@ -9,6 +7,7 @@ from sklearn import metrics
 import torch
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 from netam.common import (
     nt_mask_tensor_of,
@@ -219,20 +218,28 @@ def write_test_accuracy(
         fig, oe_results, _ = oe_plot_of(
             ratess, masks, val_bls, mut_indicators, comparison_title
         )
-        fig.savefig(f"{directory}/{comparison_title}_{suffix}.pdf")
         oe_results.pop("counts_twinx_ax")
         df_dict.update(oe_results)
-        return pd.DataFrame(df_dict, index=[0])
+        return fig, pd.DataFrame(df_dict, index=[0])
     
-    accuracy_list = [ test_accuracy_for(pcp_df, "all") ]
+    accuracy_list = []
+    
+    with PdfPages(f"{directory}/{comparison_title}.pdf") as pdf:
+        fig_all, df_all = test_accuracy_for(pcp_df, "all")
+        pdf.savefig(fig_all)
+        accuracy_list.append(df_all)
 
-    v_families = ["IGHV3", "IGHV4"]
-    for v_family in v_families:
-        sub_df = pcp_df[pcp_df["v_family"] == v_family]
-        if len(sub_df) > 0:
-            accuracy_list.append(test_accuracy_for(sub_df, v_family))
-        
-    accuracy_list.append(test_accuracy_for(pcp_df[~pcp_df["v_gene"].isin(v_families)], "other"))
+        v_families = ["IGHV3", "IGHV4"]
+        for v_family in v_families:
+            sub_df = pcp_df[pcp_df["v_family"] == v_family]
+            if len(sub_df) > 0:
+                fig_v, df_v = test_accuracy_for(sub_df, v_family)
+                pdf.savefig(fig_v)
+                accuracy_list.append(df_v)
+
+        fig_other, df_other = test_accuracy_for(pcp_df[~pcp_df["v_gene"].isin(v_families)], "other")
+        pdf.savefig(fig_other)
+        accuracy_list.append(df_other)
 
     accuracy_df = pd.concat(accuracy_list, ignore_index=True)
 
