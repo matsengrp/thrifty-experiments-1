@@ -72,20 +72,20 @@ def make_n_outside_of_shmoof_region_single(seq):
     - A modified sequence with 'N' outside the SHMoof region.
     """
     # Create the 'N' sequences for the regions outside the SHMoof region
-    early_ns = 'N' * 80
-    late_ns = 'N' * max(0, len(seq) - 320)
-    
+    early_ns = "N" * 80
+    late_ns = "N" * max(0, len(seq) - 320)
+
     # Concatenate the early 'N's, the SHMoof region, and the late 'N's
     shmoof_region = seq[80:320]  # Positions 80 to 319 inclusive
     result = early_ns + shmoof_region + late_ns
-    
+
     return result
 
 
 def make_n_outside_of_shmoof_region(seqs):
     # Assert that seqs isn't a string-- it should be an iterable of strings.
     assert not isinstance(seqs, str)
-    return [ make_n_outside_of_shmoof_region_single(seq) for seq in seqs ]
+    return [make_n_outside_of_shmoof_region_single(seq) for seq in seqs]
 
 
 def mut_accuracy_stats(mutation_indicator_list, rates_list, bl_array, mask_list):
@@ -198,7 +198,11 @@ def write_test_accuracy(
         pcp_df = pcp_df[pcp_df.apply(parent_and_child_differ, axis=1)]
     pcp_df = standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
     # write the optimized branch lengths to a file with no index
-    pcp_df.to_csv(f"{directory}/{comparison_title}.branch_lengths_csv", index=False, columns=["branch_length"])
+    pcp_df.to_csv(
+        f"{directory}/{comparison_title}.branch_lengths_csv",
+        index=False,
+        columns=["branch_length"],
+    )
 
     def test_accuracy_for(pcp_df, suffix):
         ratess, cspss = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
@@ -221,9 +225,9 @@ def write_test_accuracy(
         oe_results.pop("counts_twinx_ax")
         df_dict.update(oe_results)
         return fig, pd.DataFrame(df_dict, index=[0])
-    
+
     accuracy_list = []
-    
+
     with PdfPages(f"{directory}/{comparison_title}.pdf") as pdf:
         fig_all, df_all = test_accuracy_for(pcp_df, "all")
         pdf.savefig(fig_all)
@@ -237,7 +241,9 @@ def write_test_accuracy(
                 pdf.savefig(fig_v)
                 accuracy_list.append(df_v)
 
-        fig_other, df_other = test_accuracy_for(pcp_df[~pcp_df["v_gene"].isin(v_families)], "other")
+        fig_other, df_other = test_accuracy_for(
+            pcp_df[~pcp_df["v_gene"].isin(v_families)], "other"
+        )
         pdf.savefig(fig_other)
         accuracy_list.append(df_other)
 

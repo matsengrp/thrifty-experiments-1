@@ -34,7 +34,7 @@ holdout_dict = {
         "hepb-vax_m2_plasma",
         "np-hel-vax_m4_plasma",
     ],
-    "syn10x": ["d4"], # this one has about 25% of the data
+    "syn10x": ["d4"],  # this one has about 25% of the data
     "v1wyatt": ["d4"],
 }
 
