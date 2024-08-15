@@ -216,7 +216,7 @@ def write_test_accuracy(
         df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
         df_dict.update(base_accuracy_stats(base_idxss, cspss))
         fig, oe_results, _ = oe_plot_of(
-            ratess, masks, val_bls, mut_indicators, comparison_title
+            ratess, masks, val_bls, mut_indicators, f"{comparison_title}_{suffix}"
         )
         oe_results.pop("counts_twinx_ax")
         df_dict.update(oe_results)
