@@ -187,6 +187,7 @@ def write_test_accuracy(
     dataset_name,
     directory=".",
     restrict_evaluation_to_shmoof_region=False,
+    split_by_gene_family=False,
 ):
     matplotlib.use("Agg")
     crepe_basename = os.path.basename(crepe_prefix)
@@ -233,19 +234,20 @@ def write_test_accuracy(
         pdf.savefig(fig_all)
         accuracy_list.append(df_all)
 
-        v_families = ["IGHV3", "IGHV4"]
-        for v_family in v_families:
-            sub_df = pcp_df[pcp_df["v_family"] == v_family]
-            if len(sub_df) > 0:
-                fig_v, df_v = test_accuracy_for(sub_df, v_family)
-                pdf.savefig(fig_v)
-                accuracy_list.append(df_v)
+        if split_by_gene_family:
+            v_families = ["IGHV3", "IGHV4"]
+            for v_family in v_families:
+                sub_df = pcp_df[pcp_df["v_family"] == v_family]
+                if len(sub_df) > 0:
+                    fig_v, df_v = test_accuracy_for(sub_df, v_family)
+                    pdf.savefig(fig_v)
+                    accuracy_list.append(df_v)
 
-        fig_other, df_other = test_accuracy_for(
-            pcp_df[~pcp_df["v_gene"].isin(v_families)], "other"
-        )
-        pdf.savefig(fig_other)
-        accuracy_list.append(df_other)
+            fig_other, df_other = test_accuracy_for(
+                pcp_df[~pcp_df["v_gene"].isin(v_families)], "other"
+            )
+            pdf.savefig(fig_other)
+            accuracy_list.append(df_other)
 
     accuracy_df = pd.concat(accuracy_list, ignore_index=True)
 
