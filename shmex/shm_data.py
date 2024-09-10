@@ -34,7 +34,7 @@ holdout_dict = {
         "hepb-vax_m2_plasma",
         "np-hel-vax_m4_plasma",
     ],
-    "syn10x": ["d4"], # this one has about 25% of the data
+    "syn10x": ["d4"],  # this one has about 25% of the data
     "v1wyatt": ["d4"],
 }
 
@@ -62,7 +62,8 @@ def load_shmoof_dataframes(
     Notes:
 
     The sample nicknames are: `51` is the biggest one, `13` is the second biggest,
-    and `small` is the rest of the repertoires merged together.
+    `notbig` is the rest of the repertoires merged together, an and small is all
+    of the smallest repertoires. See below for the value_counts.
 
     If the nickname is `split`, then we do a random 80/20 split of the data.
 
@@ -93,6 +94,12 @@ def load_shmoof_dataframes(
         full_shmoof_df.loc[full_shmoof_df["nickname"] == small_nickname, "nickname"] = (
             "small"
         )
+
+    if val_nickname == "notbig":
+        for notbig_nickname in ["59", "88", "97", "small"]:
+            full_shmoof_df.loc[
+                full_shmoof_df["nickname"] == notbig_nickname, "nickname"
+            ] = "notbig"
 
     val_df = full_shmoof_df[full_shmoof_df["nickname"] == val_nickname]
     train_df = full_shmoof_df.drop(val_df.index)
@@ -224,9 +231,11 @@ def train_val_dfs_of_nicknames(dataset_names):
             train_dfs.append(train_df)
         val_dfs.append(val_df)
 
-    def concat_dfs(dfs):
+    def concat_and_annotate_dfs(dfs):
         if len(dfs) == 0:
             return None
-        return pd.concat(dfs).reset_index(drop=True)
+        df = pd.concat(dfs).reset_index(drop=True)
+        df["v_family"] = df["v_gene"].str.split("-").str[0]
+        return df
 
-    return tuple([concat_dfs(dfs) for dfs in [train_dfs, val_dfs]])
+    return tuple([concat_and_annotate_dfs(dfs) for dfs in [train_dfs, val_dfs]])

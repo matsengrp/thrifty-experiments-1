@@ -1,7 +1,5 @@
 import os
-import sys
-import io
-from IPython.display import Image, display
+
 
 import numpy as np
 import pandas as pd
@@ -9,6 +7,7 @@ from sklearn import metrics
 import torch
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 from netam.common import (
     nt_mask_tensor_of,
@@ -23,8 +22,7 @@ from netam.framework import (
 )
 from epam import oe_plot
 
-sys.path.append("..")
-from shmex.shm_data import train_val_dfs_of_nicknames
+from shmex.shm_data import parent_and_child_differ, train_val_dfs_of_nicknames
 from shmex.shm_zoo import standardize_and_optimize_branch_lengths
 
 
@@ -62,18 +60,32 @@ def ragged_np_pcp_encoding(parents, children, site_count=None):
     return mutation_indicator_list, base_idxs_list, mask_list
 
 
-def reset_outside_of_shmoof_region_single(indicator, reset_value):
-    indicator = indicator.copy()
-    indicator[:80] = reset_value
-    indicator[320:] = reset_value
-    return indicator
+def make_n_outside_of_shmoof_region_single(seq):
+    """
+    Given a sequence string, replace characters outside the SHMoof region
+    (positions 80 to 319 inclusive) with 'N'.
+
+    Parameters:
+    - seq: string, the input sequence
+
+    Returns:
+    - A modified sequence with 'N' outside the SHMoof region.
+    """
+    # Create the 'N' sequences for the regions outside the SHMoof region
+    early_ns = "N" * 80
+    late_ns = "N" * max(0, len(seq) - 320)
+
+    # Concatenate the early 'N's, the SHMoof region, and the late 'N's
+    shmoof_region = seq[80:320]  # Positions 80 to 319 inclusive
+    result = early_ns + shmoof_region + late_ns
+
+    return result
 
 
-def reset_outside_of_shmoof_region(indicators, reset_value):
-    return [
-        reset_outside_of_shmoof_region_single(indicator, reset_value)
-        for indicator in indicators
-    ]
+def make_n_outside_of_shmoof_region(seqs):
+    # Assert that seqs isn't a string-- it should be an iterable of strings.
+    assert not isinstance(seqs, str)
+    return [make_n_outside_of_shmoof_region_single(seq) for seq in seqs]
 
 
 def mut_accuracy_stats(mutation_indicator_list, rates_list, bl_array, mask_list):
@@ -130,7 +142,6 @@ def oe_plot_of(
     mut_indicators,
     suptitle_prefix="",
     binning=None,
-    restrict_to_shmoof_region=False,
     **oe_kwargs,
 ):
     """
@@ -140,9 +151,6 @@ def oe_plot_of(
     """
     mut_probs_l = []
     mut_indicators_l = []
-
-    if restrict_to_shmoof_region:
-        masks = reset_outside_of_shmoof_region(masks, 0)
 
     for rates, mask, branch_length, mut_indicator in zip(
         ratess, masks, branch_lengths, mut_indicators
@@ -158,9 +166,9 @@ def oe_plot_of(
         }
     )
 
-    fig, axs = plt.subplots(1, 1, figsize=(12, 5))
+    fig, ax = plt.subplots(1, 1, figsize=(12, 5))
     result_dict = oe_plot.plot_observed_vs_expected(
-        oe_plot_df, None, axs, None, binning=binning, **oe_kwargs
+        oe_plot_df, None, ax, None, binning=binning, **oe_kwargs
     )
     if suptitle_prefix != "":
         suptitle_prefix = suptitle_prefix + "; "
@@ -168,9 +176,10 @@ def oe_plot_of(
         f"{suptitle_prefix}overlap={result_dict['overlap']:.3g}, residual={result_dict['residual']:.3g}",
         fontsize=16,
     )
+    ax.set_xlabel(r"$\log_{10}(\text{substitution probability})$")
     plt.tight_layout()
 
-    return fig, result_dict
+    return fig, result_dict, oe_plot_df
 
 
 def write_test_accuracy(
@@ -178,39 +187,70 @@ def write_test_accuracy(
     dataset_name,
     directory=".",
     restrict_evaluation_to_shmoof_region=False,
+    split_by_gene_family=False,
 ):
     matplotlib.use("Agg")
     crepe_basename = os.path.basename(crepe_prefix)
+    comparison_title = f"{crepe_basename}-ON-{dataset_name}"
     crepe = load_crepe(crepe_prefix)
     _, pcp_df = train_val_dfs_of_nicknames(dataset_name)
-    standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
-    ratess, cspss = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
-    site_count = crepe.encoder.site_count
-    mut_indicators, base_idxss, masks = ragged_np_pcp_encoding(
-        pcp_df["parent"], pcp_df["child"], site_count
-    )
-    val_bls = pcp_df["branch_length"].values
     if restrict_evaluation_to_shmoof_region:
-        mut_indicators = reset_outside_of_shmoof_region(mut_indicators, 0)
-        base_idxss = reset_outside_of_shmoof_region(base_idxss, -1)
-        masks = reset_outside_of_shmoof_region(masks, 0)
-    df_dict = {
-        "crepe_prefix": crepe_prefix,
-        "crepe_basename": crepe_basename,
-        "parameter_count": parameter_count_of_model(crepe.model),
-        "dataset_name": dataset_name,
-    }
-    df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
-    df_dict.update(base_accuracy_stats(base_idxss, cspss))
-    comparison_title = f"{crepe_basename}-ON-{dataset_name}"
-    fig, oe_results = oe_plot_of(
-        ratess, masks, val_bls, mut_indicators, comparison_title
+        pcp_df["child"] = make_n_outside_of_shmoof_region(pcp_df["child"])
+        pcp_df = pcp_df[pcp_df.apply(parent_and_child_differ, axis=1)]
+    pcp_df = standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
+    pcp_df.to_csv(
+        f"{directory}/{comparison_title}.branch_lengths_csv",
+        index=False,
+        columns=["branch_length"],
     )
-    fig.savefig(f"{directory}/{comparison_title}.pdf")
-    oe_results.pop("counts_twinx_ax")
-    df_dict.update(oe_results)
-    df = pd.DataFrame(df_dict, index=[0])
-    df.to_csv(
+
+    def test_accuracy_for(pcp_df, suffix):
+        ratess, cspss = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
+        site_count = crepe.encoder.site_count
+        mut_indicators, base_idxss, masks = ragged_np_pcp_encoding(
+            pcp_df["parent"], pcp_df["child"], site_count
+        )
+        val_bls = pcp_df["branch_length"].values
+        df_dict = {
+            "crepe_prefix": crepe_prefix,
+            "crepe_basename": crepe_basename,
+            "parameter_count": parameter_count_of_model(crepe.model),
+            "dataset_name": f"{dataset_name}_{suffix}",
+        }
+        df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
+        df_dict.update(base_accuracy_stats(base_idxss, cspss))
+        fig, oe_results, _ = oe_plot_of(
+            ratess, masks, val_bls, mut_indicators, f"{comparison_title}_{suffix}"
+        )
+        oe_results.pop("counts_twinx_ax")
+        df_dict.update(oe_results)
+        return fig, pd.DataFrame(df_dict, index=[0])
+
+    accuracy_list = []
+
+    with PdfPages(f"{directory}/{comparison_title}.pdf") as pdf:
+        fig_all, df_all = test_accuracy_for(pcp_df, "all")
+        pdf.savefig(fig_all)
+        accuracy_list.append(df_all)
+
+        if split_by_gene_family:
+            v_families = ["IGHV3", "IGHV4"]
+            for v_family in v_families:
+                sub_df = pcp_df[pcp_df["v_family"] == v_family]
+                if len(sub_df) > 0:
+                    fig_v, df_v = test_accuracy_for(sub_df, v_family)
+                    pdf.savefig(fig_v)
+                    accuracy_list.append(df_v)
+
+            fig_other, df_other = test_accuracy_for(
+                pcp_df[~pcp_df["v_gene"].isin(v_families)], "other"
+            )
+            pdf.savefig(fig_other)
+            accuracy_list.append(df_other)
+
+    accuracy_df = pd.concat(accuracy_list, ignore_index=True)
+
+    accuracy_df.to_csv(
         f"{directory}/{comparison_title}.csv",
         index=False,
     )
@@ -220,6 +260,8 @@ def optimized_branch_lengths_of_crepe(crepe, pcp_df):
     """
     Modify the branch lengths in the pcp_df DataFrame to be the optimized
     ones for the given crepe.
+
+    Used in `shme_oe.ipynb`.
     """
     site_count = crepe.encoder.site_count
     model = crepe.model
