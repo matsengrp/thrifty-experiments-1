@@ -97,9 +97,9 @@ def load_shmoof_dataframes(
 
     if val_nickname == "notbig":
         for notbig_nickname in ["59", "88", "97", "small"]:
-            full_shmoof_df.loc[full_shmoof_df["nickname"] == notbig_nickname, "nickname"] = (
-                "notbig"
-            )
+            full_shmoof_df.loc[
+                full_shmoof_df["nickname"] == notbig_nickname, "nickname"
+            ] = "notbig"
 
     val_df = full_shmoof_df[full_shmoof_df["nickname"] == val_nickname]
     train_df = full_shmoof_df.drop(val_df.index)

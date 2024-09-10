@@ -198,7 +198,6 @@ def write_test_accuracy(
         pcp_df["child"] = make_n_outside_of_shmoof_region(pcp_df["child"])
         pcp_df = pcp_df[pcp_df.apply(parent_and_child_differ, axis=1)]
     pcp_df = standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
-    # write the optimized branch lengths to a file with no index
     pcp_df.to_csv(
         f"{directory}/{comparison_title}.branch_lengths_csv",
         index=False,
@@ -257,11 +256,12 @@ def write_test_accuracy(
     )
 
 
-# TODO what is this for?
 def optimized_branch_lengths_of_crepe(crepe, pcp_df):
     """
     Modify the branch lengths in the pcp_df DataFrame to be the optimized
     ones for the given crepe.
+
+    Used in `shme_oe.ipynb`.
     """
     site_count = crepe.encoder.site_count
     model = crepe.model
