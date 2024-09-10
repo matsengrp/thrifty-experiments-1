@@ -74,6 +74,12 @@ kmer_size_from_model_type = {
     "fivemer": 5,
 }
 
+default_burrito_params = {
+    "batch_size": 1024,
+    "learning_rate": 0.001,
+    "min_learning_rate": 1e-6,  # early stopping!
+    "weight_decay": 1e-6,
+}
 
 def kmer_size_from_model_name(model_name):
     return kmer_size_from_model_type[model_name.split("_")[-1]]
@@ -127,12 +133,6 @@ def train_model(
     Our goal with the seed is to ensure the different trainings are independent,
     not to ensure reproducibility. See comments below.
     """
-    default_burrito_params = {
-        "batch_size": 1024,
-        "learning_rate": 0.001,
-        "min_learning_rate": 1e-6,  # early stopping!
-        "weight_decay": 1e-6,
-    }
     # Update default parameters with any provided keyword arguments
     burrito_params = {**default_burrito_params, **burrito_kwargs}
 
