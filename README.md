@@ -25,9 +25,9 @@ In an environment into which you have installed `epam` and `netam`.
 * `data-description.ipynb`: Exploration of SHMoof data sets
 * `fivemer.ipynb`: L2 regularizing the 5mer model doesn't help
 * `hyper.ipynb`: Hyperparameter optimization for CNN model
-* `model_comparison.ipynb`: Main model comparison notebook
 * `noof.ipynb`: A transformer on the kmer embeddings is not a good model
 * `penalize-site-rates.ipynb`: Trying to penalize the site rates of SHMoof
+* `performance.ipynb`: Main model comparison notebook
 * `persite_wrapper.ipynb`: Developing the `PersiteWrapper` that adds a per-site component to a model and showing that regularizing it doesn't help
 * `reshmoof.ipynb`: Re-fitting the SHMoof model, playing with regularization, showing that per-site mutability tracks per-site motif mutability
 * `twolength.ipynb`: An experiment trying to see if stratifying the SHMoof model into long and short components would help, but it doesn't
