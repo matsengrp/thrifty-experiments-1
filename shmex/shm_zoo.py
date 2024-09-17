@@ -166,6 +166,8 @@ def train_model(
 
     if dataset_name.startswith("tst"):
         burrito.joint_train(epochs=2, training_method=training_method)
+    elif training_method == "simple":
+        burrito.simple_train(epochs=epochs)
     else:
         burrito.joint_train(
             epochs=epochs, training_method=training_method, cycle_count=5
