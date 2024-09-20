@@ -73,7 +73,7 @@ rule write_test_accuracy_fixed:
     output:
         test_output=test_output_path_fixed("{model_name}", "{dataset_name}")
     run:
-        write_test_accuracy(fixed_model_path(wildcards.model_name), wildcards.dataset_name, "_ignore/test_output_fixed", restrict_evaluation_to_shmoof_region)
+        write_test_accuracy(fixed_model_path(wildcards.model_name), wildcards.dataset_name, min_log_prob, "_ignore/test_output_fixed", restrict_evaluation_to_shmoof_region)
 
 
 rule concatenate_csvs:
