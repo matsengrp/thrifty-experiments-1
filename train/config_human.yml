@@ -7,3 +7,4 @@ test_data_nicknames: ["shmoof_small", "val_tangshm", "shmoof_59", "val_syn10x25k
 training_methods: ["fixed", "full"]
 # training_methods: ["fixed", "yun", "full"]
 replicate_count: 3
+min_log_prob: -4

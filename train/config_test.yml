@@ -4,4 +4,4 @@ test_data_nicknames: ["tst"]
 #test_data_nicknames: ["tst", "val_syn10x5k"]
 training_methods: ["fixed"]
 replicate_count: 1
-
+min_log_prob: -4

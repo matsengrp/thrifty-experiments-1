@@ -18,6 +18,7 @@ test_data_nicknames = config["test_data_nicknames"]
 training_methods = config["training_methods"]
 seeds = range(config["replicate_count"])
 restrict_evaluation_to_shmoof_region = True
+min_log_prob = config["min_log_prob"]
 
 fixed_model_names = ["s5f","cnn_ind_med-shmoof_small"]
 final_output_path = f"_ignore/{species}_model_compare.csv"
@@ -65,7 +66,7 @@ rule write_test_accuracy:
         test_fig=test_fig_path("{model_name}", "{data_nickname}", "{training_method}", "{seed}", "{dataset_name}")
     run:
         crepe_prefix = os.path.splitext(input.trained_model)[0]
-        write_test_accuracy(crepe_prefix, wildcards.dataset_name, "_ignore/test_output", restrict_evaluation_to_shmoof_region)
+        write_test_accuracy(crepe_prefix, wildcards.dataset_name, min_log_prob, "_ignore/test_output", restrict_evaluation_to_shmoof_region)
 
 
 rule write_test_accuracy_fixed:
