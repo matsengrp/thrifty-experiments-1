@@ -185,6 +185,7 @@ def oe_plot_of(
 def write_test_accuracy(
     crepe_prefix,
     dataset_name,
+    min_log_prob,
     directory=".",
     restrict_evaluation_to_shmoof_region=False,
     split_by_gene_family=False,
@@ -204,6 +205,11 @@ def write_test_accuracy(
         columns=["branch_length"],
     )
 
+    if min_log_prob is not None:
+        binning = np.linspace(min_log_prob, 0, 101)
+    else:
+        binning = None
+
     def test_accuracy_for(pcp_df, suffix):
         ratess, cspss = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
         site_count = crepe.encoder.site_count
@@ -220,7 +226,12 @@ def write_test_accuracy(
         df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
         df_dict.update(base_accuracy_stats(base_idxss, cspss))
         fig, oe_results, _ = oe_plot_of(
-            ratess, masks, val_bls, mut_indicators, f"{comparison_title}_{suffix}"
+            ratess,
+            masks,
+            val_bls,
+            mut_indicators,
+            f"{comparison_title}_{suffix}",
+            binning=binning,
         )
         oe_results.pop("counts_twinx_ax")
         df_dict.update(oe_results)
