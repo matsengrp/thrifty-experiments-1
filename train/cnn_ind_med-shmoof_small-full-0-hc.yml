@@ -1,0 +1,7 @@
+encoder_class: PlaceholderEncoder
+encoder_parameters: {}
+model_class: HitClassModel
+model_hyperparameters: {}
+serialization_version: 0
+training_hyperparameters:
+  learning_rate: 0.1
