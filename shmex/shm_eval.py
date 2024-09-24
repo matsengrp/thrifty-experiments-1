@@ -189,6 +189,7 @@ def write_test_accuracy(
     directory=".",
     restrict_evaluation_to_shmoof_region=False,
     split_by_gene_family=False,
+    optimize_branch_lengths=False,
 ):
     matplotlib.use("Agg")
     crepe_basename = os.path.basename(crepe_prefix)
@@ -198,12 +199,13 @@ def write_test_accuracy(
     if restrict_evaluation_to_shmoof_region:
         pcp_df["child"] = make_n_outside_of_shmoof_region(pcp_df["child"])
         pcp_df = pcp_df[pcp_df.apply(parent_and_child_differ, axis=1)]
-    pcp_df = standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
-    pcp_df.to_csv(
-        f"{directory}/{comparison_title}.branch_lengths_csv",
-        index=False,
-        columns=["branch_length"],
-    )
+    if optimize_branch_lengths:
+        pcp_df = standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
+        pcp_df.to_csv(
+            f"{directory}/{comparison_title}.branch_lengths_csv",
+            index=False,
+            columns=["branch_length"],
+        )
 
     if min_log_prob is not None:
         binning = np.linspace(min_log_prob, 0, 101)
