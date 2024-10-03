@@ -81,6 +81,7 @@ default_burrito_params = {
     "weight_decay": 1e-6,
 }
 
+
 def kmer_size_from_model_name(model_name):
     return kmer_size_from_model_type[model_name.split("_")[-1]]
 
@@ -203,3 +204,32 @@ def standardize_and_optimize_branch_lengths(model, pcp_df):
     pcp_df["orig_branch_length"] = pcp_df["branch_length"]
     pcp_df["branch_length"] = burrito.val_dataset.branch_lengths
     return pcp_df
+
+
+# Dictionaries for translation
+model_translations = {
+    "fivemer": "5mer",
+    "rsshmoof": "Spisak",
+    "cnn": "CNN",
+    "ind": "Indep",
+    "joi": "Joined",
+    "hyb": "Hybrid",
+    "sml": "Small",
+    "med": "Medium",
+    "lrg": "Large",
+    "4k": "4K",
+}
+
+
+def long_name_of_short_name(short_name):
+    parts = short_name.split("_")
+    # Translate each part using the model_translations dictionary
+    full_name_parts = [model_translations.get(part, part) for part in parts]
+    # Special handling for models without underscores
+    if len(full_name_parts) == 1:
+        full_name = model_translations.get(short_name, short_name)
+    else:
+        # Join the translated parts with spaces for CNN models
+        full_name = " ".join(full_name_parts[:-1]) + " " + full_name_parts[-1]
+
+    return full_name

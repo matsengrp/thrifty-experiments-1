@@ -1,0 +1,4 @@
+model,kernel_size,embedding_dim,filter_count,parameters
+CNN Joined Large,11,7,19,2057
+CNN Indep Medium,9,7,16,4539
+CNN Indep Large,11,7,19,5931
