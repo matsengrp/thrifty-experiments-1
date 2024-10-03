@@ -233,3 +233,20 @@ def long_name_of_short_name(short_name):
         full_name = " ".join(full_name_parts[:-1]) + " " + full_name_parts[-1]
 
     return full_name
+
+
+def fix_parameter_count(row):
+    if row["model"] in ["rsshmoof", "origshmoof"]:
+        # For every row with rsshmoof as the model subtract off 4**5 from the
+        # parameter count, correspding to every possible 5mer getting mutated to
+        # itself. We handle this setting indirectly by zeroing out the WT
+        # prediction.
+        return row["parameter_count"] - 4**5
+    elif row["model"] in ["fivemer"]:
+        # This corresponds to every 5mer being mutated to itself, and also 
+        # the fact that for the parameterization we're using rates and
+        # conditional probabilities, which are only used as a product 
+        # so the effective number of parameters is less.
+        return row["parameter_count"] - 2 * 4**5
+    else:
+        return row["parameter_count"]
