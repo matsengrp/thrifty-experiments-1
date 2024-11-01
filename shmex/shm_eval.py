@@ -142,6 +142,7 @@ def oe_plot_of(
     mut_indicators,
     suptitle_prefix="",
     binning=None,
+    ax=None,
     **oe_kwargs,
 ):
     """
@@ -166,13 +167,17 @@ def oe_plot_of(
         }
     )
 
-    fig, ax = plt.subplots(1, 1, figsize=(12, 5))
+    if ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=(12, 5))
+    else:
+        fig = ax.get_figure()
+        
     result_dict = oe_plot.plot_observed_vs_expected(
         oe_plot_df, None, ax, None, binning=binning, **oe_kwargs
     )
     if suptitle_prefix != "":
         suptitle_prefix = suptitle_prefix + "; "
-    fig.suptitle(
+    ax.set_title(
         f"{suptitle_prefix}overlap={result_dict['overlap']:.3g}, residual={result_dict['residual']:.3g}",
         fontsize=16,
     )
