@@ -19,7 +19,7 @@ training_methods = config["training_methods"]
 seeds = range(config["replicate_count"])
 min_log_prob = config["min_log_prob"]
 restrict_evaluation_to_shmoof_region = True
-optimize_branch_lengths = False
+optimize_branch_lengths = True
 
 fixed_model_names = ["s5f","cnn_ind_med-shmoof_small"]
 final_output_path = f"_ignore/{species}_model_compare.csv"
