@@ -171,7 +171,7 @@ def oe_plot_of(
         fig, ax = plt.subplots(1, 1, figsize=(12, 5))
     else:
         fig = ax.get_figure()
-        
+
     result_dict = oe_plot.plot_observed_vs_expected(
         oe_plot_df, None, ax, None, binning=binning, **oe_kwargs
     )

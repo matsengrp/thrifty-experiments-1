@@ -243,9 +243,9 @@ def fix_parameter_count(row):
         # prediction.
         return row["parameter_count"] - 4**5
     elif row["model"] in ["fivemer"]:
-        # This corresponds to every 5mer being mutated to itself, and also 
+        # This corresponds to every 5mer being mutated to itself, and also
         # the fact that for the parameterization we're using rates and
-        # conditional probabilities, which are only used as a product 
+        # conditional probabilities, which are only used as a product
         # so the effective number of parameters is less.
         return row["parameter_count"] - 2 * 4**5
     else:

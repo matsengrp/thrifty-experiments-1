@@ -84,7 +84,7 @@ def load_shmoof_dataframes(
         full_shmoof_df = full_shmoof_df.sample(sample_count)
 
     if val_nickname == "split":
-        train_df = full_shmoof_df.sample(frac=2/3, random_state=random_seed)
+        train_df = full_shmoof_df.sample(frac=2 / 3, random_state=random_seed)
         val_df = full_shmoof_df.drop(train_df.index)
         return train_df, val_df
 
