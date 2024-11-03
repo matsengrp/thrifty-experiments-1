@@ -140,7 +140,7 @@ def oe_plot_of(
     masks,
     branch_lengths,
     mut_indicators,
-    suptitle_prefix="",
+    title_prefix="",
     binning=None,
     ax=None,
     **oe_kwargs,
@@ -175,10 +175,10 @@ def oe_plot_of(
     result_dict = oe_plot.plot_observed_vs_expected(
         oe_plot_df, None, ax, None, binning=binning, **oe_kwargs
     )
-    if suptitle_prefix != "":
-        suptitle_prefix = suptitle_prefix + "; "
+    if title_prefix != "":
+        title_prefix = title_prefix + "; "
     ax.set_title(
-        f"{suptitle_prefix}overlap={result_dict['overlap']:.3g}, residual={result_dict['residual']:.3g}",
+        f"{title_prefix}overlap={result_dict['overlap']:.3g}, residual={result_dict['residual']:.3g}",
         fontsize=16,
     )
     ax.set_xlabel(r"$\log_{10}(\text{substitution probability})$")
