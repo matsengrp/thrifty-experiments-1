@@ -1,0 +1,6 @@
+model,model name,kernel_size,embedding_dim,filter_count,parameter_count
+cnn_joi_lrg,CNN Joined Large,11,7,19,2057
+fivemer,5mer,-,-,-,3077
+rsshmoof,Spisak,-,-,-,3576
+cnn_ind_med,CNN Indep Medium,9,7,16,4539
+cnn_ind_lrg,CNN Indep Large,11,7,19,5931

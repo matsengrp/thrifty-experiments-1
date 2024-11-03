@@ -140,8 +140,9 @@ def oe_plot_of(
     masks,
     branch_lengths,
     mut_indicators,
-    suptitle_prefix="",
+    title_prefix="",
     binning=None,
+    ax=None,
     **oe_kwargs,
 ):
     """
@@ -166,14 +167,18 @@ def oe_plot_of(
         }
     )
 
-    fig, ax = plt.subplots(1, 1, figsize=(12, 5))
+    if ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=(12, 5))
+    else:
+        fig = ax.get_figure()
+
     result_dict = oe_plot.plot_observed_vs_expected(
         oe_plot_df, None, ax, None, binning=binning, **oe_kwargs
     )
-    if suptitle_prefix != "":
-        suptitle_prefix = suptitle_prefix + "; "
-    fig.suptitle(
-        f"{suptitle_prefix}overlap={result_dict['overlap']:.3g}, residual={result_dict['residual']:.3g}",
+    if title_prefix != "":
+        title_prefix = title_prefix + "; "
+    ax.set_title(
+        f"{title_prefix}overlap={result_dict['overlap']:.3g}, residual={result_dict['residual']:.3g}",
         fontsize=16,
     )
     ax.set_xlabel(r"$\log_{10}(\text{substitution probability})$")
@@ -185,9 +190,11 @@ def oe_plot_of(
 def write_test_accuracy(
     crepe_prefix,
     dataset_name,
+    min_log_prob,
     directory=".",
     restrict_evaluation_to_shmoof_region=False,
     split_by_gene_family=False,
+    optimize_branch_lengths=False,
 ):
     matplotlib.use("Agg")
     crepe_basename = os.path.basename(crepe_prefix)
@@ -197,12 +204,18 @@ def write_test_accuracy(
     if restrict_evaluation_to_shmoof_region:
         pcp_df["child"] = make_n_outside_of_shmoof_region(pcp_df["child"])
         pcp_df = pcp_df[pcp_df.apply(parent_and_child_differ, axis=1)]
-    pcp_df = standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
-    pcp_df.to_csv(
-        f"{directory}/{comparison_title}.branch_lengths_csv",
-        index=False,
-        columns=["branch_length"],
-    )
+    if optimize_branch_lengths:
+        pcp_df = standardize_and_optimize_branch_lengths(crepe.model, pcp_df)
+        pcp_df.to_csv(
+            f"{directory}/{comparison_title}.branch_lengths_csv",
+            index=False,
+            columns=["branch_length"],
+        )
+
+    if min_log_prob is not None:
+        binning = np.linspace(min_log_prob, 0, 101)
+    else:
+        binning = None
 
     def test_accuracy_for(pcp_df, suffix):
         ratess, cspss = trimmed_shm_model_outputs_of_crepe(crepe, pcp_df["parent"])
@@ -220,7 +233,12 @@ def write_test_accuracy(
         df_dict.update(mut_accuracy_stats(mut_indicators, ratess, val_bls, masks))
         df_dict.update(base_accuracy_stats(base_idxss, cspss))
         fig, oe_results, _ = oe_plot_of(
-            ratess, masks, val_bls, mut_indicators, f"{comparison_title}_{suffix}"
+            ratess,
+            masks,
+            val_bls,
+            mut_indicators,
+            f"{comparison_title}_{suffix}",
+            binning=binning,
         )
         oe_results.pop("counts_twinx_ax")
         df_dict.update(oe_results)

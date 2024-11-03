@@ -159,3 +159,4 @@ _logs/
 netam
 .snakemake
 train/trained_models/*
+crepes-to-check/

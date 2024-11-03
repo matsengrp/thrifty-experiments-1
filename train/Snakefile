@@ -17,7 +17,9 @@ train_data_nicknames = config["train_data_nicknames"]
 test_data_nicknames = config["test_data_nicknames"]
 training_methods = config["training_methods"]
 seeds = range(config["replicate_count"])
+min_log_prob = config["min_log_prob"]
 restrict_evaluation_to_shmoof_region = True
+optimize_branch_lengths = True
 
 fixed_model_names = ["s5f","cnn_ind_med-shmoof_small"]
 final_output_path = f"_ignore/{species}_model_compare.csv"
@@ -65,14 +67,28 @@ rule write_test_accuracy:
         test_fig=test_fig_path("{model_name}", "{data_nickname}", "{training_method}", "{seed}", "{dataset_name}")
     run:
         crepe_prefix = os.path.splitext(input.trained_model)[0]
-        write_test_accuracy(crepe_prefix, wildcards.dataset_name, "_ignore/test_output", restrict_evaluation_to_shmoof_region)
+        write_test_accuracy(
+            crepe_prefix=crepe_prefix, 
+            dataset_name=wildcards.dataset_name, 
+            min_log_prob=min_log_prob, 
+            directory="_ignore/test_output", 
+            restrict_evaluation_to_shmoof_region=restrict_evaluation_to_shmoof_region, 
+            split_by_gene_family=False,
+            optimize_branch_lengths=optimize_branch_lengths)
 
 
 rule write_test_accuracy_fixed:
     output:
         test_output=test_output_path_fixed("{model_name}", "{dataset_name}")
     run:
-        write_test_accuracy(fixed_model_path(wildcards.model_name), wildcards.dataset_name, "_ignore/test_output_fixed", restrict_evaluation_to_shmoof_region)
+        write_test_accuracy(
+            crepe_prefix=fixed_model_path(wildcards.model_name),
+            dataset_name=wildcards.dataset_name, 
+            min_log_prob=min_log_prob, 
+            directory="_ignore/test_output_fixed", 
+            restrict_evaluation_to_shmoof_region=restrict_evaluation_to_shmoof_region, 
+            split_by_gene_family=False,
+            optimize_branch_lengths=optimize_branch_lengths)
 
 
 rule concatenate_csvs:
