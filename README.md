@@ -36,19 +36,19 @@ To run the more limited analysis on all the models, enter the `train` directory 
     snakemake -cN --configfile config_human_all.yml
 
 
-## Results
+## Notebook-based experiments
 
 Other associated experiments are in the following notebooks. 
 
 * `cnnpe.ipynb`: Adding a positional encoding to the CNN
 * `cnnxformer.ipynb`: Adding a transformer to the CNN makes it worse
+* `crepe_of_shmoof.ipynb`: Fitting the original Spisak et al. model weights into the framework used here
 * `data-description.ipynb`: Exploration of SHMoof data sets
+* `model_summaries.ipynb`: Summarizing model shapes
+* `multihit_*`: Multihit analysis to be described in a future manuscript
+* `neutral_codon.ipynb`: Also part of the multihit analysis
 * `noof.ipynb`: A transformer on the kmer embeddings is not a good model
 * `performance.ipynb`: Main model comparison notebook
 * `persite_wrapper.ipynb`: Developing the `PersiteWrapper` that adds a per-site component to a model and showing that regularizing it doesn't help
 * `reshmoof.ipynb`: Re-fitting the SHMoof model, playing with regularization, showing that per-site mutability tracks per-site motif mutability
-crepe_of_shmoof.ipynb
-model_summaries.ipynb
-multihit_extensions.ipynb multihit_model_exploration.ipynb multihit_use.ipynb
-neutral_codon.ipynb
-shm_oe.ipynb
+* `shm_oe.ipynb`: Oberved/expected plotting
