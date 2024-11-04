@@ -9,7 +9,7 @@ sys.path.append("..")
 from shmex.shm_zoo import train_model, trained_model_str, trained_model_path, fixed_model_path
 from shmex.shm_eval import write_test_accuracy
 
-configfile: "config_human.yml"
+configfile: "config_human_select.yml"
 
 species = config["species"]
 model_names = config["model_names"]
@@ -68,11 +68,11 @@ rule write_test_accuracy:
     run:
         crepe_prefix = os.path.splitext(input.trained_model)[0]
         write_test_accuracy(
-            crepe_prefix=crepe_prefix, 
-            dataset_name=wildcards.dataset_name, 
-            min_log_prob=min_log_prob, 
-            directory="_ignore/test_output", 
-            restrict_evaluation_to_shmoof_region=restrict_evaluation_to_shmoof_region, 
+            crepe_prefix=crepe_prefix,
+            dataset_name=wildcards.dataset_name,
+            min_log_prob=min_log_prob,
+            directory="_ignore/test_output",
+            restrict_evaluation_to_shmoof_region=restrict_evaluation_to_shmoof_region,
             split_by_gene_family=False,
             optimize_branch_lengths=optimize_branch_lengths)
 
@@ -83,10 +83,10 @@ rule write_test_accuracy_fixed:
     run:
         write_test_accuracy(
             crepe_prefix=fixed_model_path(wildcards.model_name),
-            dataset_name=wildcards.dataset_name, 
-            min_log_prob=min_log_prob, 
-            directory="_ignore/test_output_fixed", 
-            restrict_evaluation_to_shmoof_region=restrict_evaluation_to_shmoof_region, 
+            dataset_name=wildcards.dataset_name,
+            min_log_prob=min_log_prob,
+            directory="_ignore/test_output_fixed",
+            restrict_evaluation_to_shmoof_region=restrict_evaluation_to_shmoof_region,
             split_by_gene_family=False,
             optimize_branch_lengths=optimize_branch_lengths)
 
