@@ -6,3 +6,4 @@ These are additional experiments that I did at one point or another. I have not 
 * `hyper.ipynb`: Hyperparameter optimization for CNN model
 * `fivemer.ipynb`: L2 regularizing the 5mer model doesn't help
 * `penalize-site-rates.ipynb`: Trying to penalize the site rates of SHMoof
+* `multihit-poisson.ipynb`: An attempt to derive a Poisson codon model

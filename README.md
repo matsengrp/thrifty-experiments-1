@@ -1,39 +1,54 @@
-# netam-experiments-1
+# thrifty-experiments-1
 
-Experiments with [netam](https://github.com/matsengrp/netam)
+SHM experiments with the [netam](https://github.com/matsengrp/netam) package as described in the manuscript ``Thrifty wide-context models of B cell receptor somatic hypermutation'' by Sung, et al.
 
-To install
+Start by creating an environment and installing netam into it as described in the `netam` README.
+
+To do the analysis described here, you will need to install the `shmex` package contained in this repository. 
+To do so, clone this repository and install the package with from the root of this repository.
 
     pip install -e .
 
 In an environment into which you have installed `epam` and `netam`.
 
 
-## Goals
+## Local configuration and data
 
-* modern techniques such as regularization and transformers
-* a comprehensive survey, and provide useful software with rigorous metrics
-* comparison to oracle
+First download data using the Dryad link associated with the paper.
+
+Then edit `shmex/local.py` to reflect your directory structure.
+
+To run a small trial analysis to see if things are working, enter the `train` directory and execute
+
+    snakemake -cN --configfile config_test.yml
+
+
+## Running the primary experiments
+
+To train the main models and do the validation, enter the `train` directory and execute
+
+    snakemake -cN
+
+This will run the analysis on `N` cores (substitute your desired number of cores for `N`).
+
+To run the more limited analysis on all the models, enter the `train` directory and execute
+
+    snakemake -cN --configfile config_human_all.yml
 
 
 ## Results
 
-* `cnn_1mer.ipynb`: Hyperparameter optimization for CNN1Mer model
-* `cnnmlp.ipynb`: Adding a hidden layer in the final layer is bad
+Other associated experiments are in the following notebooks. 
+
 * `cnnpe.ipynb`: Adding a positional encoding to the CNN
 * `cnnxformer.ipynb`: Adding a transformer to the CNN makes it worse
 * `data-description.ipynb`: Exploration of SHMoof data sets
-* `fivemer.ipynb`: L2 regularizing the 5mer model doesn't help
-* `hyper.ipynb`: Hyperparameter optimization for CNN model
 * `noof.ipynb`: A transformer on the kmer embeddings is not a good model
-* `penalize-site-rates.ipynb`: Trying to penalize the site rates of SHMoof
 * `performance.ipynb`: Main model comparison notebook
 * `persite_wrapper.ipynb`: Developing the `PersiteWrapper` that adds a per-site component to a model and showing that regularizing it doesn't help
 * `reshmoof.ipynb`: Re-fitting the SHMoof model, playing with regularization, showing that per-site mutability tracks per-site motif mutability
-* `twolength.ipynb`: An experiment trying to see if stratifying the SHMoof model into long and short components would help, but it doesn't
-
-
-## Conclusions
-* CNN using kmer embeddings work, and can be parameter-sparse
-* transformers aren't good for this problem, and positional encoding appears to hurt
-* this doesn't really give credence to the idea that position along the sequence matters
+crepe_of_shmoof.ipynb
+model_summaries.ipynb
+multihit_extensions.ipynb multihit_model_exploration.ipynb multihit_use.ipynb
+neutral_codon.ipynb
+shm_oe.ipynb
