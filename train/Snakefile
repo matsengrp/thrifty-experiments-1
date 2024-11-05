@@ -18,12 +18,13 @@ test_data_nicknames = config["test_data_nicknames"]
 training_methods = config["training_methods"]
 seeds = range(config["replicate_count"])
 min_log_prob = config["min_log_prob"]
+select_or_all = config["select_or_all"]
 restrict_evaluation_to_shmoof_region = True
 optimize_branch_lengths = True
 
 fixed_model_names = ["s5f","cnn_ind_med-shmoof_small"]
-final_output_path = f"_ignore/{species}_model_compare.csv"
-final_fig_path = f"_ignore/{species}_model_compare.pdf"
+final_output_path = f"_ignore/{species}_model_compare_{select_or_all}.csv"
+final_fig_path = f"_ignore/{species}_model_compare_{select_or_all}.pdf"
 
 
 def trained_model_yml(model_name, data_nickname, training_method, seed):
