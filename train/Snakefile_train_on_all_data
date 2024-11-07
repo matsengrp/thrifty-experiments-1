@@ -3,7 +3,7 @@ import os
 from shmex.shm_zoo import train_model, trained_model_path
 
 model_names = ["cnn_joi_lrg", "cnn_ind_med", "cnn_ind_lrg"]
-train_data_nicknames = ["shmoof_notbig"]
+train_data_nicknames = ["shmoof_all+tangshm"]
 training_methods = ["simple"]
 seeds = [0]
 
