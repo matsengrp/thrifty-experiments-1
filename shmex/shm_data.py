@@ -157,28 +157,19 @@ def train_val_dfs_of_nickname(dataset_name, val_is_train=False):
     """
     Returns the train and validation dataframes for the given dataset_name.
 
-    What's a little confusing here is that some of the datasets are only used
-    for test, so this function will return None for the train_df in those cases.
-
-    When dataset_name starts with "val_", then we return the whole dataset as
+    Note that some of the datasets are only used for test, so this function will
+    return None for the train_df in those cases. For example, when dataset_name
+    starts with "val_", then we return the whole dataset as
     the validation set.
+
+    On the other hand, when val_is_train is True, then we return the whole dataset
+    as the training set and the validation set is the same as the training set.
+    This only works when the dataset is a shmoof dataset or the dataset is
+    "tangshm".
+    
+    This is a messy function! ¯\_(ツ)_/¯
     """
-    if dataset_name == "cui":
-        full_df = pcp_df_of_non_shmoof_nickname("cui")
-        val_df = full_df[full_df["sample_id"] == "NP+GC1_BC9_IGK_Export_2017-02-02"]
-        train_df = full_df.drop(val_df.index)
-        return train_df, val_df
-    # TODO
-    elif dataset_name == "cui_overtrain":
-        full_df = pcp_df_of_non_shmoof_nickname("cui")
-        return full_df, full_df.copy()
-    elif dataset_name == "greiff":
-        full_df = pcp_df_of_non_shmoof_nickname("greiff")
-        return train_val_split_from_val_sample_ids(full_df, holdout_dict["greiff"])
-    elif dataset_name == "val_cui":
-        val_df = pcp_df_of_non_shmoof_nickname("cui")
-        return None, val_df
-    elif dataset_name == "val_tangshm1k":
+    if dataset_name == "val_tangshm1k":
         val_df = pcp_df_of_non_shmoof_nickname("tangshm", sample_count=1000)
         return None, val_df
     elif dataset_name == "val_tangshm":
@@ -210,6 +201,9 @@ def train_val_dfs_of_nickname(dataset_name, val_is_train=False):
     elif dataset_name == "val_oracletangcnn":
         val_df = pcp_df_of_non_shmoof_nickname("oracletangcnn")
         return None, val_df
+    elif dataset_name == "tangshm" and val_is_train:
+        pcp_df = pcp_df_of_non_shmoof_nickname("tangshm")
+        return pcp_df, pcp_df
     # else we are doing a shmoof dataset
     if dataset_name == "tst":
         sample_count = 1000
