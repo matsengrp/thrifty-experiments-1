@@ -47,7 +47,11 @@ def parent_and_child_differ(row):
 
 
 def load_shmoof_dataframes(
-    csv_path, sample_count=None, val_nickname="13", random_seed=42, val_is_train=False,
+    csv_path,
+    sample_count=None,
+    val_nickname="13",
+    random_seed=42,
+    val_is_train=False,
 ):
     """Load the shmoof dataframes from the csv_path and return train and validation dataframes.
 
@@ -216,7 +220,10 @@ def train_val_dfs_of_nickname(dataset_name, val_is_train=False):
         shmoof, val_nickname = dataset_name.split("_")
         assert shmoof == "shmoof", f"Dataset {dataset_name} not recognized"
     train_df, val_df = load_shmoof_dataframes(
-        dataset_dict["shmoof"], sample_count=sample_count, val_nickname=val_nickname, val_is_train=val_is_train,
+        dataset_dict["shmoof"],
+        sample_count=sample_count,
+        val_nickname=val_nickname,
+        val_is_train=val_is_train,
     )
     return train_df, val_df
 
@@ -233,7 +240,9 @@ def train_val_dfs_of_nicknames(dataset_names, val_is_train=False):
     train_dfs = []
     val_dfs = []
     for dataset_name in dataset_names:
-        train_df, val_df = train_val_dfs_of_nickname(dataset_name, val_is_train=val_is_train)
+        train_df, val_df = train_val_dfs_of_nickname(
+            dataset_name, val_is_train=val_is_train
+        )
         if train_df is not None:
             train_dfs.append(train_df)
         val_dfs.append(val_df)
