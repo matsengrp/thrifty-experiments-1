@@ -1,15 +1,9 @@
 import os
-import random
-import sys
-import time
-import yaml
 
-from netam.framework import crepe_exists
-sys.path.append("..")
 from shmex.shm_zoo import train_model, trained_model_str, trained_model_path, fixed_model_path
 from shmex.shm_eval import write_test_accuracy
 
-configfile: "config_human.yml"
+configfile: "config_human_select.yml"
 
 species = config["species"]
 model_names = config["model_names"]
@@ -18,12 +12,13 @@ test_data_nicknames = config["test_data_nicknames"]
 training_methods = config["training_methods"]
 seeds = range(config["replicate_count"])
 min_log_prob = config["min_log_prob"]
+select_or_all = config["select_or_all"]
 restrict_evaluation_to_shmoof_region = True
 optimize_branch_lengths = True
 
 fixed_model_names = ["s5f","cnn_ind_med-shmoof_small"]
-final_output_path = f"_ignore/{species}_model_compare.csv"
-final_fig_path = f"_ignore/{species}_model_compare.pdf"
+final_output_path = f"_ignore/{species}_model_compare_{select_or_all}.csv"
+final_fig_path = f"_ignore/{species}_model_compare_{select_or_all}.pdf"
 
 
 def trained_model_yml(model_name, data_nickname, training_method, seed):
@@ -68,11 +63,11 @@ rule write_test_accuracy:
     run:
         crepe_prefix = os.path.splitext(input.trained_model)[0]
         write_test_accuracy(
-            crepe_prefix=crepe_prefix, 
-            dataset_name=wildcards.dataset_name, 
-            min_log_prob=min_log_prob, 
-            directory="_ignore/test_output", 
-            restrict_evaluation_to_shmoof_region=restrict_evaluation_to_shmoof_region, 
+            crepe_prefix=crepe_prefix,
+            dataset_name=wildcards.dataset_name,
+            min_log_prob=min_log_prob,
+            directory="_ignore/test_output",
+            restrict_evaluation_to_shmoof_region=restrict_evaluation_to_shmoof_region,
             split_by_gene_family=False,
             optimize_branch_lengths=optimize_branch_lengths)
 
@@ -83,10 +78,10 @@ rule write_test_accuracy_fixed:
     run:
         write_test_accuracy(
             crepe_prefix=fixed_model_path(wildcards.model_name),
-            dataset_name=wildcards.dataset_name, 
-            min_log_prob=min_log_prob, 
-            directory="_ignore/test_output_fixed", 
-            restrict_evaluation_to_shmoof_region=restrict_evaluation_to_shmoof_region, 
+            dataset_name=wildcards.dataset_name,
+            min_log_prob=min_log_prob,
+            directory="_ignore/test_output_fixed",
+            restrict_evaluation_to_shmoof_region=restrict_evaluation_to_shmoof_region,
             split_by_gene_family=False,
             optimize_branch_lengths=optimize_branch_lengths)
 

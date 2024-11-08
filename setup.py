@@ -12,6 +12,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "biopython",
+        "ipykernel",
         "pandas",
         "pyyaml",
         "seaborn",
@@ -19,7 +20,6 @@ setup(
         "torch",
         "tqdm",
     ],
-    python_requires="==3.9.*",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Science/Research",

@@ -1,0 +1,8 @@
+species: "human"
+model_names: ["fivemer", "rsshmoof", "cnn_joi_lrg", "cnn_ind_med", "cnn_ind_lrg"]
+train_data_nicknames: ["shmoof_notbig", "shmoof_notbig+syn10x"]
+test_data_nicknames: ["shmoof_notbig", "val_tangshm", "val_syn10x25k"]
+training_methods: ["simple"]
+select_or_all: "select"
+replicate_count: 5
+min_log_prob: -4

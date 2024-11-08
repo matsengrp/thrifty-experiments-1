@@ -128,11 +128,14 @@ def train_model(
     training_method,
     seed,
     crepe_dest_path=None,
+    val_is_train=False,
     **burrito_kwargs,
 ):
     """
     Our goal with the seed is to ensure the different trainings are independent,
     not to ensure reproducibility. See comments below.
+
+    See the comments in train_val_dfs_of_nicknames for more information on val_is_train.
     """
     # Update default parameters with any provided keyword arguments
     burrito_params = {**default_burrito_params, **burrito_kwargs}
@@ -143,7 +146,9 @@ def train_model(
     # If we want to ensure reproducibility, we would also set the following:
     # torch.backends.cudnn.deterministic = True
     # torch.backends.cudnn.benchmark = False
-    train_df, val_df = train_val_dfs_of_nicknames(dataset_name)
+    train_df, val_df = train_val_dfs_of_nicknames(
+        dataset_name, val_is_train=val_is_train
+    )
     if crepe_dest_path is None:
         crepe_dest_path = trained_model_path(
             model_name, dataset_name, training_method, seed

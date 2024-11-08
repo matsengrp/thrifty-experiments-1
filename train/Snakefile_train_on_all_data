@@ -1,0 +1,24 @@
+import os
+
+from shmex.shm_zoo import train_model, trained_model_path
+
+model_names = ["cnn_joi_lrg", "cnn_ind_med", "cnn_ind_lrg"]
+train_data_nicknames = ["shmoof_all+tangshm"]
+training_methods = ["simple"]
+seeds = [0]
+
+
+def trained_model_yml(model_name, data_nickname, training_method, seed):
+    return f"{trained_model_path(model_name, data_nickname, training_method, seed)}.yml"
+
+
+rule all:
+    input: [trained_model_yml(m, d, tm, s) for m in model_names for d in train_data_nicknames for tm in training_methods for s in seeds]
+
+
+rule train_model:
+    output:
+        trained_model=trained_model_yml("{model_name}", "{data_nickname}", "{training_method}", "{seed}")
+    run:
+        # Here's the key bit: we're passing val_is_train=True to train_model.
+        train_model(wildcards.model_name, wildcards.data_nickname, wildcards.training_method, int(wildcards.seed), val_is_train=True)
