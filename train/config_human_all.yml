@@ -4,5 +4,5 @@ train_data_nicknames: ["shmoof_notbig"]
 test_data_nicknames: ["shmoof_notbig", "val_tangshm"]
 training_methods: ["simple"]
 select_or_all: "all"
-replicate_count: 3
+replicate_count: 5
 min_log_prob: -4
