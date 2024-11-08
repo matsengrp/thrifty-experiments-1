@@ -3,7 +3,7 @@ import os
 from shmex.shm_zoo import train_model, trained_model_path
 
 model_names = ["cnn_joi_lrg", "cnn_ind_med", "cnn_ind_lrg"]
-train_data_nicknames = ["shmoof_all+tangshm"]
+train_data_nicknames = ["shmoof_notbig+tangshm"]
 training_methods = ["simple"]
 seeds = [0]
 
@@ -20,5 +20,5 @@ rule train_model:
     output:
         trained_model=trained_model_yml("{model_name}", "{data_nickname}", "{training_method}", "{seed}")
     run:
-        # Here's the key bit: we're passing val_is_train=True to train_model.
+        # Here's the key bit: we're passing val_is_train=True to train_model. This means that we take the union of the train and test data and use that as the training set.
         train_model(wildcards.model_name, wildcards.data_nickname, wildcards.training_method, int(wildcards.seed), val_is_train=True)
