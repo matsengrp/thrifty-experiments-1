@@ -2,7 +2,7 @@
 
 # This script copies the trained models with their appropriate names to the thrifty-models directory.
 
-BASE_DEST_DIR="../../thrifty-models"
+BASE_DEST_DIR="../../thrifty-models/models"
 
 file_pairs=(
     "cnn_ind_lrg-shmoof_all+tangshm-simple-0 TH1-20"
