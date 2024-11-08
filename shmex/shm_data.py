@@ -40,7 +40,6 @@ def load_shmoof_dataframes(
     sample_count=None,
     val_nickname="13",
     random_seed=42,
-    val_is_train=False,
 ):
     """Load the shmoof dataframes from the csv_path and return train and validation dataframes.
 
@@ -49,7 +48,6 @@ def load_shmoof_dataframes(
         sample_count (int, optional): Number of samples to use. Defaults to None.
         val_nickname (str, optional): Nickname of the sample to use for validation. Defaults to "13".
         random_seed (int, optional): Random seed to use for the split. Defaults to 42.
-        val_is_train (bool, optional): If True, then we use all the data for training and make the validation set is the same as the training set. We only do this when we are training a final model and want to use all of the data. Defaults to False.
 
     Returns:
         tuple: Tuple of train and validation dataframes.
@@ -74,9 +72,6 @@ def load_shmoof_dataframes(
 
     # only keep rows where parent is different than child
     full_shmoof_df = full_shmoof_df[full_shmoof_df["parent"] != full_shmoof_df["child"]]
-
-    if val_is_train:
-        return full_shmoof_df, full_shmoof_df
 
     if sample_count is not None:
         full_shmoof_df = full_shmoof_df.sample(sample_count)
@@ -142,7 +137,7 @@ def train_val_split_from_val_sample_ids(full_df, val_sample_ids):
     return train_df, val_df
 
 
-def train_val_dfs_of_nickname(dataset_name, val_is_train=False):
+def train_val_dfs_of_nickname(dataset_name):
     """
     Returns the train and validation dataframes for the given dataset_name.
 
@@ -151,11 +146,6 @@ def train_val_dfs_of_nickname(dataset_name, val_is_train=False):
     starts with "val_", then we return the whole dataset as
     the validation set.
 
-    On the other hand, when val_is_train is True, then we return the whole dataset
-    as the training set and the validation set is the same as the training set.
-    This only works when the dataset is a shmoof dataset or the dataset is
-    "tangshm".
-    
     This is a messy function! ¯\_(ツ)_/¯
     """
     if dataset_name == "val_tangshm1k":
@@ -190,9 +180,9 @@ def train_val_dfs_of_nickname(dataset_name, val_is_train=False):
     elif dataset_name == "val_oracletangcnn":
         val_df = pcp_df_of_non_shmoof_nickname("oracletangcnn")
         return None, val_df
-    elif dataset_name == "tangshm" and val_is_train:
+    elif dataset_name == "tangshm":
         pcp_df = pcp_df_of_non_shmoof_nickname("tangshm")
-        return pcp_df, pcp_df
+        return pcp_df, None
     # else we are doing a shmoof dataset
     if dataset_name == "tst":
         sample_count = 1000
@@ -206,26 +196,21 @@ def train_val_dfs_of_nickname(dataset_name, val_is_train=False):
         dataset_dict["shmoof"],
         sample_count=sample_count,
         val_nickname=val_nickname,
-        val_is_train=val_is_train,
     )
     return train_df, val_df
 
 
-def train_val_dfs_of_nicknames(dataset_names, val_is_train=False):
+def train_val_dfs_of_nicknames(dataset_names):
     """
     Splits dataset_names by "+", runs train_val_dfs_of_nickname on each one,
     and combines each pair of train and validation dataframes into a single
     pair of train and validation dataframes.
-
-    See train_val_dfs_of_nickname for more information on val_is_train.
     """
     dataset_names = dataset_names.split("+")
     train_dfs = []
     val_dfs = []
     for dataset_name in dataset_names:
-        train_df, val_df = train_val_dfs_of_nickname(
-            dataset_name, val_is_train=val_is_train
-        )
+        train_df, val_df = train_val_dfs_of_nickname(dataset_name)
         if train_df is not None:
             train_dfs.append(train_df)
         val_dfs.append(val_df)
