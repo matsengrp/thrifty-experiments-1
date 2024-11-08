@@ -7,14 +7,9 @@ from netam import framework
 
 
 dataset_dict = {
-    "shmoof": "data/v0/shmoof_pcp_2023-11-30_MASKED.csv.gz",
+    "shmoof": "data/v1/shmoof_pcp_2024-04-11_MASKED_NI.csv.gz",
     "tangshm": "data/v1/tang-deepshm-oof_pcp_2024-04-09_MASKED_NI.csv.gz",
-    "cui": "data/v0/cui-et-al-oof_pcp_2024-02-22_MASKED_NI.csv.gz",
-    "cuims": "data/v0/cui-et-al-oof-msproc_pcp_2024-02-29_MASKED_NI.csv",
-    "greiff": "data/v0/greiff-systems-oof_pcp_2023-11-30_MASKED_NI.csv.gz",
     "syn10x": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_SYN.csv.gz",
-    "oracleshmoofcnn10k": "data/v0/mimic_shmoof_CNNJoiLrgShmoofSmall.10K.csv.gz",
-    "oracletangcnn": "data/v0/mimic_tang_CNNJoiLrgShmoofSmall.csv.gz",
     "v1wyatt": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_noN_no-naive.csv.gz",
     "v1rodriguez": "data/v1/rodriguez-airr-seq-race-prod_pcp_2024-04-01_MASKED_NI_noN_no-naive.csv.gz",
 }
@@ -28,12 +23,6 @@ def localify(path):
 dataset_dict = {name: localify(path) for name, path in dataset_dict.items()}
 
 holdout_dict = {
-    "greiff": [
-        "no-vax_m5_plasma",
-        "ova-vax_m1_plasma",
-        "hepb-vax_m2_plasma",
-        "np-hel-vax_m4_plasma",
-    ],
     "syn10x": ["d4"],  # this one has about 25% of the data
     "v1wyatt": ["d4"],
 }
