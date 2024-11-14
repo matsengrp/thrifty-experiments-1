@@ -106,6 +106,7 @@ def pcp_df_of_non_shmoof_nickname(dataset_name, sample_count=None):
     print(f"Loading {dataset_dict[dataset_name]}")
 
     pcp_df = pd.read_csv(dataset_dict[dataset_name], index_col=0)
+    pcp_df = pcp_df[pcp_df["parent_is_naive"] == False]
     pcp_df = pcp_df[pcp_df.apply(parent_and_child_differ, axis=1)]
     if sample_count is not None:
         pcp_df = pcp_df.sample(sample_count)
