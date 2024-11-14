@@ -5,9 +5,9 @@
 BASE_DEST_DIR="../../thrifty-models/models"
 
 file_pairs=(
-    "cnn_ind_lrg-shmoof_all+tangshm-simple-0 TH1-20"
-    "cnn_ind_med-shmoof_all+tangshm-simple-0 TH1-45"
-    "cnn_joi_lrg-shmoof_all+tangshm-simple-0 TH1-59"
+    "cnn_ind_lrg-shmoof_notbig+tangshm-simple-0 TH1-20"
+    "cnn_ind_med-shmoof_notbig+tangshm-simple-0 TH1-45"
+    "cnn_joi_lrg-shmoof_notbig+tangshm-simple-0 TH1-59"
 )
 
 for pair in "${file_pairs[@]}"; do
