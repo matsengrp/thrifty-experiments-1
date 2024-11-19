@@ -8,6 +8,7 @@ from netam import framework
 
 dataset_dict = {
     "shmoof": "data/v0/shmoof_pcp_2023-11-30_MASKED.csv.gz",
+    "val_curatedShmoofNotbigNoN": "data/v0/shmoof_pcp_2023-11-30_notbig_NI_noN.csv",
     "tangshm": "data/v1/tang-deepshm-oof_pcp_2024-04-09_MASKED_NI.csv.gz",
     "syn10x": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_SYN.csv.gz",
     "v1wyatt": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_noN_no-naive.csv.gz",
@@ -106,11 +107,14 @@ def pcp_df_of_non_shmoof_nickname(dataset_name, sample_count=None):
     print(f"Loading {dataset_dict[dataset_name]}")
 
     pcp_df = pd.read_csv(dataset_dict[dataset_name], index_col=0)
-    pcp_df = pcp_df[pcp_df["parent_is_naive"] == False]
+    if "parent_is_naive" in pcp_df.columns:
+        pcp_df = pcp_df[pcp_df["parent_is_naive"] == False]
     pcp_df = pcp_df[pcp_df.apply(parent_and_child_differ, axis=1)]
     if sample_count is not None:
         pcp_df = pcp_df.sample(sample_count)
     pcp_df = pcp_df.reset_index(drop=True)
+
+    print(f"Loaded {len(pcp_df)} PCPs from {dataset_name}")
 
     return pcp_df
 
@@ -184,6 +188,9 @@ def train_val_dfs_of_nickname(dataset_name):
     elif dataset_name == "tangshm":
         pcp_df = pcp_df_of_non_shmoof_nickname("tangshm")
         return pcp_df, None
+    elif dataset_name.startswith("val_curated"):
+        pcp_df = pcp_df_of_non_shmoof_nickname(dataset_name)
+        return None, pcp_df
     # else we are doing a shmoof dataset
     if dataset_name == "tst":
         sample_count = 1000
@@ -217,6 +224,7 @@ def train_val_dfs_of_nicknames(dataset_names):
         val_dfs.append(val_df)
 
     def concat_and_annotate_dfs(dfs):
+        dfs = [df for df in dfs if df is not None]
         if len(dfs) == 0:
             return None
         df = pd.concat(dfs).reset_index(drop=True)
