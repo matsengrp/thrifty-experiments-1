@@ -4,6 +4,7 @@
 
 BASE_DEST_DIR="../../thrifty-models/models"
 
+# Re "_notbig" below, note that because `Snakefile_train_on_all_data` uses val_is_train=True, it's actually training on the full dataset.
 file_pairs=(
     "cnn_ind_lrg-shmoof_notbig+tangshm-simple-0 TH1-20"
     "cnn_ind_med-shmoof_notbig+tangshm-simple-0 TH1-45"
