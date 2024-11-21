@@ -1,10 +1,11 @@
+# This is a one-off Snakefile that we use to train for a comparison with the DeepSHM model: we just train on the tang data.
 import os
 
 from shmex.shm_zoo import train_model, trained_model_path
 
 model_names = ["cnn_joi_lrg", "cnn_ind_med", "cnn_ind_lrg"]
 # Re _notbig: we are training on all the data. See below.
-train_data_nicknames = ["shmoof_notbig+tangshm"]
+train_data_nicknames = ["tangshm"]
 training_methods = ["simple"]
 seeds = [0]
 
