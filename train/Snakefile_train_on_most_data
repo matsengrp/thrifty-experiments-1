@@ -1,4 +1,4 @@
-# This Snakefile is for training on all the data, and is what forms the release.
+# This Snakefile is for training on all the data except for the shmoof hold-outs, and is used for the comparison to DeepSHM.
 
 from shmex.shm_zoo import train_model, trained_model_path
 
@@ -22,4 +22,4 @@ rule train_model:
         trained_model=trained_model_yml("{model_name}", "{data_nickname}", "{training_method}", "{seed}")
     run:
         # Here's the key bit: we're passing val_is_train=True to train_model. This means that we take the union of the train and test data and use that as the training set.
-        train_model(wildcards.model_name, wildcards.data_nickname, wildcards.training_method, int(wildcards.seed), val_is_train=True)
+        train_model(wildcards.model_name, wildcards.data_nickname, wildcards.training_method, int(wildcards.seed))

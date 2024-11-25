@@ -104,7 +104,7 @@ rule concatenate_csvs:
         combined_csv = final_output_path
     shell:
         """
-        epam concatenate_csvs $(echo '{input.csvs}' | tr ' ' ',') {output.combined_csv}
+        netam concatenate_csvs $(echo '{input.csvs}' | tr ' ' ',') {output.combined_csv}
         """
 
 
