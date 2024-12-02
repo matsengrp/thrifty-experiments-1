@@ -8,13 +8,9 @@ from netam import framework
 
 dataset_dict = {
     "shmoof": "data/v0/shmoof_pcp_2023-11-30_MASKED.csv.gz",
+    "val_curatedShmoofNotbigNoN": "data/v0/shmoof_pcp_2023-11-30_notbig_NI_noN.csv.gz",
     "tangshm": "data/v1/tang-deepshm-oof_pcp_2024-04-09_MASKED_NI.csv.gz",
-    "cui": "data/v0/cui-et-al-oof_pcp_2024-02-22_MASKED_NI.csv.gz",
-    "cuims": "data/v0/cui-et-al-oof-msproc_pcp_2024-02-29_MASKED_NI.csv",
-    "greiff": "data/v0/greiff-systems-oof_pcp_2023-11-30_MASKED_NI.csv.gz",
     "syn10x": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_SYN.csv.gz",
-    "oracleshmoofcnn10k": "data/v0/mimic_shmoof_CNNJoiLrgShmoofSmall.10K.csv.gz",
-    "oracletangcnn": "data/v0/mimic_tang_CNNJoiLrgShmoofSmall.csv.gz",
     "v1wyatt": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_noN_no-naive.csv.gz",
     "v1rodriguez": "data/v1/rodriguez-airr-seq-race-prod_pcp_2024-04-01_MASKED_NI_noN_no-naive.csv.gz",
 }
@@ -28,12 +24,6 @@ def localify(path):
 dataset_dict = {name: localify(path) for name, path in dataset_dict.items()}
 
 holdout_dict = {
-    "greiff": [
-        "no-vax_m5_plasma",
-        "ova-vax_m1_plasma",
-        "hepb-vax_m2_plasma",
-        "np-hel-vax_m4_plasma",
-    ],
     "syn10x": ["d4"],  # this one has about 25% of the data
     "v1wyatt": ["d4"],
 }
@@ -51,7 +41,6 @@ def load_shmoof_dataframes(
     sample_count=None,
     val_nickname="13",
     random_seed=42,
-    val_is_train=False,
 ):
     """Load the shmoof dataframes from the csv_path and return train and validation dataframes.
 
@@ -60,7 +49,6 @@ def load_shmoof_dataframes(
         sample_count (int, optional): Number of samples to use. Defaults to None.
         val_nickname (str, optional): Nickname of the sample to use for validation. Defaults to "13".
         random_seed (int, optional): Random seed to use for the split. Defaults to 42.
-        val_is_train (bool, optional): If True, then we use all the data for training and make the validation set is the same as the training set. We only do this when we are training a final model and want to use all of the data. Defaults to False.
 
     Returns:
         tuple: Tuple of train and validation dataframes.
@@ -85,9 +73,6 @@ def load_shmoof_dataframes(
 
     # only keep rows where parent is different than child
     full_shmoof_df = full_shmoof_df[full_shmoof_df["parent"] != full_shmoof_df["child"]]
-
-    if val_is_train:
-        return full_shmoof_df, full_shmoof_df
 
     if sample_count is not None:
         full_shmoof_df = full_shmoof_df.sample(sample_count)
@@ -122,10 +107,14 @@ def pcp_df_of_non_shmoof_nickname(dataset_name, sample_count=None):
     print(f"Loading {dataset_dict[dataset_name]}")
 
     pcp_df = pd.read_csv(dataset_dict[dataset_name], index_col=0)
+    if "parent_is_naive" in pcp_df.columns:
+        pcp_df = pcp_df[pcp_df["parent_is_naive"] == False]
     pcp_df = pcp_df[pcp_df.apply(parent_and_child_differ, axis=1)]
     if sample_count is not None:
         pcp_df = pcp_df.sample(sample_count)
     pcp_df = pcp_df.reset_index(drop=True)
+
+    print(f"Loaded {len(pcp_df)} PCPs from {dataset_name}")
 
     return pcp_df
 
@@ -153,7 +142,7 @@ def train_val_split_from_val_sample_ids(full_df, val_sample_ids):
     return train_df, val_df
 
 
-def train_val_dfs_of_nickname(dataset_name, val_is_train=False):
+def train_val_dfs_of_nickname(dataset_name):
     """
     Returns the train and validation dataframes for the given dataset_name.
 
@@ -162,11 +151,6 @@ def train_val_dfs_of_nickname(dataset_name, val_is_train=False):
     starts with "val_", then we return the whole dataset as
     the validation set.
 
-    On the other hand, when val_is_train is True, then we return the whole dataset
-    as the training set and the validation set is the same as the training set.
-    This only works when the dataset is a shmoof dataset or the dataset is
-    "tangshm".
-    
     This is a messy function! ¯\_(ツ)_/¯
     """
     if dataset_name == "val_tangshm1k":
@@ -201,9 +185,12 @@ def train_val_dfs_of_nickname(dataset_name, val_is_train=False):
     elif dataset_name == "val_oracletangcnn":
         val_df = pcp_df_of_non_shmoof_nickname("oracletangcnn")
         return None, val_df
-    elif dataset_name == "tangshm" and val_is_train:
+    elif dataset_name == "tangshm":
         pcp_df = pcp_df_of_non_shmoof_nickname("tangshm")
-        return pcp_df, pcp_df
+        return pcp_df, None
+    elif dataset_name.startswith("val_curated"):
+        pcp_df = pcp_df_of_non_shmoof_nickname(dataset_name)
+        return None, pcp_df
     # else we are doing a shmoof dataset
     if dataset_name == "tst":
         sample_count = 1000
@@ -217,31 +204,27 @@ def train_val_dfs_of_nickname(dataset_name, val_is_train=False):
         dataset_dict["shmoof"],
         sample_count=sample_count,
         val_nickname=val_nickname,
-        val_is_train=val_is_train,
     )
     return train_df, val_df
 
 
-def train_val_dfs_of_nicknames(dataset_names, val_is_train=False):
+def train_val_dfs_of_nicknames(dataset_names):
     """
     Splits dataset_names by "+", runs train_val_dfs_of_nickname on each one,
     and combines each pair of train and validation dataframes into a single
     pair of train and validation dataframes.
-
-    See train_val_dfs_of_nickname for more information on val_is_train.
     """
     dataset_names = dataset_names.split("+")
     train_dfs = []
     val_dfs = []
     for dataset_name in dataset_names:
-        train_df, val_df = train_val_dfs_of_nickname(
-            dataset_name, val_is_train=val_is_train
-        )
+        train_df, val_df = train_val_dfs_of_nickname(dataset_name)
         if train_df is not None:
             train_dfs.append(train_df)
         val_dfs.append(val_df)
 
     def concat_and_annotate_dfs(dfs):
+        dfs = [df for df in dfs if df is not None]
         if len(dfs) == 0:
             return None
         df = pd.concat(dfs).reset_index(drop=True)
