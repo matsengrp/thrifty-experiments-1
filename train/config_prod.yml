@@ -1,10 +1,7 @@
 species: "prod"
-model_names: ["fivemer", "rsshmoof", "cnn_joi_sml", "cnn_joi_med", "cnn_joi_lrg", "cnn_hyb_sml", "cnn_hyb_med", "cnn_hyb_lrg", "cnn_ind_sml", "cnn_ind_med", "cnn_ind_lrg"]
-# model_names: ["fivemer", "rsshmoof", "cnn_joi_lrg", "cnn_ind_med"]
+model_names: ["cnn_ind_lrg"]
 train_data_nicknames: ["v1wyatt"]
 test_data_nicknames: ["val_v1rodriguez"]
-# test_data_nicknames: ["shmoof_small", "val_tangshm", "val_oracleshmoofcnn10k", "val_oracletangcnn"]
-training_methods: ["fixed", "full"]
-# training_methods: ["fixed", "yun", "full"]
-replicate_count: 3
+training_methods: ["simple", "full"]
+replicate_count: 1
 min_log_prob: -4
