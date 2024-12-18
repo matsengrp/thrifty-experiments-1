@@ -14,7 +14,7 @@ In an environment into which you have installed `epam` and `netam`.
 
 ## Local configuration and data
 
-First download data from Dryad, which will be available at <https://doi.org/10.5061/dryad.np5hqc044> but for now is [here](http://datadryad.org/stash/share/ohGPcqIvGWtOc-0hIfrM03raYndcc-KvXrr2fedASuU).
+First download data from Dryad, which is available at <https://doi.org/10.5061/dryad.np5hqc044>.
 
 Then edit `shmex/local.py` to reflect your directory structure.
 
