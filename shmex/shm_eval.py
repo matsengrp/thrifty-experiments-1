@@ -9,10 +9,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-from netam.common import (
-    nt_mask_tensor_of,
-    parameter_count_of_model,
-)
+from netam.common import parameter_count_of_model
+from netam.sequences import nt_mask_tensor_of
 from netam.framework import (
     encode_mut_pos_and_base,
     load_crepe,
