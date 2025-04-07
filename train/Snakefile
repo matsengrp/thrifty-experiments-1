@@ -122,7 +122,7 @@ rule concatenate_figs:
             ]
     output:
         combined_fig = final_fig_path
-    shell:
+    run:
         """
         merge_pdfs(input.figs, output.combined_fig)
         """
