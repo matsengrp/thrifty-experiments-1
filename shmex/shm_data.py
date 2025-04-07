@@ -163,6 +163,9 @@ def train_val_dfs_of_nickname(dataset_name):
     elif dataset_name.startswith("syn10x"):
         full_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(dataset_name)
         return train_val_split_from_val_sample_ids(full_df, holdout_dict["syn10x"])
+    elif dataset_name.startswith("syntang"):
+        full_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(dataset_name)
+        return train_val_split_from_val_sample_ids(full_df, holdout_dict["syntang"])
     elif dataset_name.startswith("val_syn10x"):
         # remove the "val_" prefix
         truncated_dataset_name = dataset_name[4:]
