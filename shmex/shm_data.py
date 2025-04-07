@@ -27,6 +27,7 @@ dataset_dict = {name: localify(path) for name, path in dataset_dict.items()}
 holdout_dict = {
     "syn10x": ["d4"],  # this one has about 25% of the data
     "v1wyatt": ["d4"],
+    "syntang": ["B11", "B20", "B21", "CLL1729"],
 }
 
 
