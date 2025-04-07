@@ -2,6 +2,7 @@ import os
 
 from shmex.shm_zoo import train_model, trained_model_str, trained_model_path, fixed_model_path
 from shmex.shm_eval import write_test_accuracy
+from shmex.util import merge_pdfs
 
 configfile: "config_human_select.yml"
 
@@ -123,5 +124,5 @@ rule concatenate_figs:
         combined_fig = final_fig_path
     shell:
         """
-        pdfunite {input.figs} {output.combined_fig}
+        merge_pdfs(input.figs, output.combined_fig)
         """
