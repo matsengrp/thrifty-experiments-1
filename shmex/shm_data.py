@@ -11,6 +11,7 @@ dataset_dict = {
     "val_curatedShmoofNotbigNoN": "data/v0/shmoof_pcp_2023-11-30_notbig_NI_noN.csv.gz",
     "tangshm": "data/v1/tang-deepshm-oof_pcp_2024-04-09_MASKED_NI.csv.gz",
     "syn10x": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_SYN.csv.gz",
+    "syntang": "data/v1/tang-deepshm-prod_pcp_2024-04-01_MASKED_NI_SYN.csv.gz",
     "v1wyatt": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_noN_no-naive.csv.gz",
     "v1rodriguez": "data/v1/rodriguez-airr-seq-race-prod_pcp_2024-04-01_MASKED_NI_noN_no-naive.csv.gz",
 }
@@ -26,6 +27,7 @@ dataset_dict = {name: localify(path) for name, path in dataset_dict.items()}
 holdout_dict = {
     "syn10x": ["d4"],  # this one has about 25% of the data
     "v1wyatt": ["d4"],
+    "syntang": ["B11", "B20", "B21", "CLL1729"],
 }
 
 
@@ -162,7 +164,17 @@ def train_val_dfs_of_nickname(dataset_name):
     elif dataset_name.startswith("syn10x"):
         full_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(dataset_name)
         return train_val_split_from_val_sample_ids(full_df, holdout_dict["syn10x"])
+    elif dataset_name.startswith("syntang"):
+        full_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(dataset_name)
+        return train_val_split_from_val_sample_ids(full_df, holdout_dict["syntang"])
     elif dataset_name.startswith("val_syn10x"):
+        # remove the "val_" prefix
+        truncated_dataset_name = dataset_name[4:]
+        val_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(
+            truncated_dataset_name
+        )
+        return None, val_df
+    elif dataset_name.startswith("val_syntang"):
         # remove the "val_" prefix
         truncated_dataset_name = dataset_name[4:]
         val_df = pcp_df_of_non_shmoof_nickname_using_k_for_sample_count(
