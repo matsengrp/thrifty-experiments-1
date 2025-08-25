@@ -1,6 +1,6 @@
 # thrifty-experiments-1
 
-SHM experiments with the [netam](https://github.com/matsengrp/netam) package as described in the manuscript [_Thrifty wide-context models of B cell receptor somatic hypermutation_](https://www.biorxiv.org/content/10.1101/2024.11.26.625407v1) by Sung, et al.
+SHM experiments with the [netam](https://github.com/matsengrp/netam) package as described in the manuscript [_Thrifty wide-context models of B cell receptor somatic hypermutation_](https://doi.org/10.7554/eLife.105471.2) by Sung, et al.
 
 Start by creating an environment and installing netam into it as described in the `netam` README.
 
