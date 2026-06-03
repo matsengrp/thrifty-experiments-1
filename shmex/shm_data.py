@@ -5,22 +5,17 @@ import pandas as pd
 
 from netam import framework
 
+from shmex.local import localify
 
 dataset_dict = {
-    "shmoof": "data/v0/shmoof_pcp_2023-11-30_MASKED.csv.gz",
-    "val_curatedShmoofNotbigNoN": "data/v0/shmoof_pcp_2023-11-30_notbig_NI_noN.csv.gz",
-    "tangshm": "data/v1/tang-deepshm-oof_pcp_2024-04-09_MASKED_NI.csv.gz",
-    "syn10x": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_SYN.csv.gz",
-    "syntang": "data/v1/tang-deepshm-prod_pcp_2024-04-01_MASKED_NI_SYN.csv.gz",
-    "v1wyatt": "data/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_noN_no-naive.csv.gz",
-    "v1rodriguez": "data/v1/rodriguez-airr-seq-race-prod_pcp_2024-04-01_MASKED_NI_noN_no-naive.csv.gz",
+    "shmoof": "DATA_DIR/v0/shmoof_pcp_2023-11-30_MASKED.csv.gz",
+    "val_curatedShmoofNotbigNoN": "DATA_DIR/v0/shmoof_pcp_2023-11-30_notbig_NI_noN.csv.gz",
+    "tangshm": "DATA_DIR/v1/tang-deepshm-oof_pcp_2024-04-09_MASKED_NI.csv.gz",
+    "syn10x": "DATA_DIR/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_SYN.csv.gz",
+    "syntang": "DATA_DIR/v1/tang-deepshm-prod_pcp_2024-04-01_MASKED_NI_SYN.csv.gz",
+    "v1wyatt": "DATA_DIR/v1/wyatt-10x-1p5m_fs-all_pcp_2024-04-29_NI_noN_no-naive.csv.gz",
+    "v1rodriguez": "DATA_DIR/v1/rodriguez-airr-seq-race-prod_pcp_2024-04-01_MASKED_NI_noN_no-naive.csv.gz",
 }
-
-
-def localify(path):
-    home_dir = os.path.expanduser("~")
-    return os.path.join(home_dir, path)
-
 
 dataset_dict = {name: localify(path) for name, path in dataset_dict.items()}
 
