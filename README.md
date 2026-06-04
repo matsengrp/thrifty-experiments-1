@@ -14,57 +14,87 @@ This archive contains all the necessary notebooks, trained models, and supportin
 
 ## Installation
 
-### 1. Install netam
+The setup below has been run with Python 3.12.
 
-First, install the [netam](https://github.com/matsengrp/netam) package in a virtual environment as described in the netam README.
-
-### 2. Install this package
+### 1. Install this package
 
 ```bash
-# Clone this repository
-git clone this repository
+git clone https://github.com/matsengrp/thrifty-experiments-1
 cd thrifty-experiments-1
+python -m venv .venv
+source .venv/bin/activate
 
 # Install in development mode
 pip install -e .
+cd -
 ```
 
-Note: Ensure you have both `epam` and `netam` installed in your environment.
+### 2. Install epam
 
-### 3. Configure local paths and data
+```bash
+git clone https://github.com/matsengrp/epam
+cd epam
+make install
+cd -
+```
+
+### 3. Install netam
+
+```bash
+git clone https://github.com/matsengrp/netam
+cd netam
+git checkout 030ceee
+make install
+cd -
+```
+
+### 4. Configure local paths and data
 
 Download data from Dryad: <https://doi.org/10.5061/dryad.np5hqc044>
 
-Edit `shmex/local.py` to set paths appropriate for your system.
+Edit `LOCAL_PATHS` dictionary in `thrifty-experiments-1/shmex/local.py` to set paths appropriate for your system. Specifically,
+- edit `DATA_DIR` to the path containing the contents of the Dryad archive
+- edit `FIGURES_DIR` to where some notebooks will write some outputs to
+
+
+## Repository Structure
+
+```
+├── data/                    # S5F model files and a small simulation dataset
+├── deepshm/                 # Data and scripts for comparison with DeepSHM
+├── human/                   # Analysis notebooks on human data
+├── shmex/                   # Python package with analysis utilities
+├── train/                   # Model training pipeline and configurations
+└── README.md                # This file
+```
 
 ## Running the primary experiments
+
+The model training pipelines are to be run in `train/`.
 
 ### Quick test
 
 To run a small trial analysis to verify your setup:
 
 ```bash
-cd train
-snakemake -cN --configfile config_test.yml
+snakemake -cN --configfile config_test.yml  # Replace N with desired number of cores
 ```
 
 ### Main model training and validation
 
 ```bash
-cd train
 snakemake -cN  # Replace N with desired number of cores
 ```
 
 ### Extended analysis on all models
 
 ```bash
-cd train
-snakemake -cN --configfile config_human_all.yml
+snakemake -cN --configfile config_human_all.yml  # Replace N with desired number of cores
 ```
 
 ## Key Notebooks
 
-The main analyses from the paper can be reproduced using these notebooks:
+The main analyses from the paper can be reproduced using these notebooks in `human/`:
 
 - **`performance.ipynb`** - Main model comparison notebook
 - **`shm_oe.ipynb`** - Observed/expected plotting
@@ -81,15 +111,6 @@ The main analyses from the paper can be reproduced using these notebooks:
 - **`persite_wrapper.ipynb`** - Developing the `PersiteWrapper` that adds a per-site component to a model and showing that regularizing it doesn't help
 - **`multihit_*`** - Multihit analysis to be described in a future manuscript
 - **`neutral_codon.ipynb`** - Also part of the multihit analysis
-
-## Repository Structure
-
-```
-├── train/                   # Model training pipeline and configurations
-├── shmex/                   # Python package with analysis utilities
-├── notebooks/               # Analysis notebooks
-└── README.md               # This file
-```
 
 ## Citation
 
