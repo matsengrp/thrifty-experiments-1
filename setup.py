@@ -19,6 +19,8 @@ setup(
         "tensorboardX",
         "torch",
         "tqdm",
+        "pypdf",
+        "scikit-learn<1.7"
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
